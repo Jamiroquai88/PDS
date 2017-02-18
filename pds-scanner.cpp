@@ -18,7 +18,7 @@
  */
 void signal_callback_handler(int signum)
 {
-
+	exit(-1);
 }
 
 /**
@@ -46,10 +46,6 @@ int main(int argc, char * argv[] ) {
     if (getuid() && geteuid())
     	print_msg_and_abort("You must be root to run this.");
     signal(SIGINT, signal_callback_handler);
-
-    int sockfd;
-    if((sockfd = socket(AF_INET, SOCK_RAW, htons(IPPROTO_RAW))) < 0)
-    	print_msg_and_abort("socket() failed");
 
     Interface inface = Interface(interface_name);
 
