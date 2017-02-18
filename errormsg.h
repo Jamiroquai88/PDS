@@ -4,14 +4,14 @@
 #include <iostream>
 
 
-void print_help() {
+void print_help_scanner() {
     std::cerr << "Usage: ./pds-scanner -i interface -f file" << std::endl;
 }
 
 
 void print_abort(std::string msg) {
     std::cerr << "ERROR: " << msg << std::endl;
-    print_help();
+    print_help_scanner();
     exit(-1);
 }
 
