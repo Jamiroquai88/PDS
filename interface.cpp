@@ -25,32 +25,35 @@ Interface::Interface(std::string name) : m_sockfd(0), m_index(0) {
 	}
 
 	while(ifa != NULL) {
-		if (ifa->ifa_addr->sa_family==AF_INET) {
+		if (ifa->ifa_addr->sa_family == AF_INET) {
 			strcpy(ifr.ifr_name, ifa->ifa_name);
-			if (ioctl(m_sockfd, SIOCGIFFLAGS, &ifr) && (!ifr.ifr_flags & (IFF_UP|IFF_RUNNING)))
+			if (ioctl(m_sockfd, SIOCGIFFLAGS, &ifr) && !ifr.ifr_flags & (IFF_UP|IFF_RUNNING))
 				continue;
-			std::cout << ifa->ifa_name;
-			if (name ==  ifa->ifa_name) {
+			if (name == ifa->ifa_name) {
 				m_name = ifa->ifa_name;
+				std::cout << m_name << std::endl;
 
 				sa_in = (struct sockaddr_in *) ifa->ifa_addr;
 				m_ip = inet_ntoa(sa_in->sin_addr);
-
+				std::cout << m_ip << std::endl;
 				if (ioctl(m_sockfd, SIOCGIFHWADDR, &ifr) < 0) {
 					freeifaddrs(ifa);
 					print_msg_and_abort("ioctl SIOCGIFHWADDR failed");
 				}
 				m_mac = ifr.ifr_hwaddr.sa_data;
-
+				std::cout << m_mac << std::endl;
 				if (ioctl(m_sockfd, SIOCGIFINDEX, &ifr) < 0) {
 					freeifaddrs(ifa);
 					print_msg_and_abort("ioctl SIOCGIFINDEX failed\n");
 				}
 				m_index = ifr.ifr_ifindex;
+				std::cout << m_index << std::endl;
 				break;
 			} else {
 				continue;
 			}
+		} else {
+			ifa = ifa->ifa_next;
 		}
 	}
 	freeifaddrs(ifa);
