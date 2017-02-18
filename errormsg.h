@@ -1,18 +1,10 @@
-#ifndef ERROR_MSG
-#define ERROR_MSG
+#ifndef ERRORMSG_H_
+#define ERRORMSG_H_
 
 #include <iostream>
 
 
-void print_help_scanner() {
-    std::cerr << "Usage: ./pds-scanner -i interface -f file" << std::endl;
-}
+void print_help_scanner();
+void print_msg_and_abort(std::string msg);
 
-
-void print_abort(std::string msg) {
-    std::cerr << "ERROR: " << msg << std::endl;
-    print_help_scanner();
-    exit(-1);
-}
-
-#endif
+#endif /* ERRORMSG_H_ */
