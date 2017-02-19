@@ -5,11 +5,13 @@
  *      Author: jose
  */
 
+#include <iostream>
 #include "host.h"
 #include <stdio.h>
 #include <string.h>
 
 Host::Host(char ipv4[16], char mac[20]) {
+	std::cout << "Constructor" << ipv4 << " " << mac << std::endl;
 	memcpy(m_ipv4, ipv4, 16);
 	memcpy(m_mac, mac, 20);
 }
