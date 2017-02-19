@@ -84,6 +84,7 @@ void *Interface::Sniff() {
 			continue;
 
 		for (auto &i : m_hosts) {
+			usleep(2000000);
 			sprintf(ipv4, "%u.%u.%u.%u", arp_rply->sip[0], arp_rply->sip[1],
 					arp_rply->sip[2], arp_rply->sip[3]);
 			sprintf(mac,"%02x:%02x:%02x:%02x:%02x:%02x",
