@@ -43,6 +43,8 @@ Interface::Interface(std::string name) : m_sockfd(0), m_index(0) {
 					print_msg_and_abort("ioctl SIOCGIFHWADDR failed");
 				}
 				m_mac = ifr.ifr_hwaddr.sa_data;
+				iface->mac[0], iface->mac[1],
+                                iface->mac[2], iface->mac[3], iface->mac[4], iface->mac[5]
 				std::cout << "Interface mac: " << ifr.ifr_hwaddr.sa_data << std::endl;
 
 				if (ioctl(m_sockfd, SIOCGIFINDEX, &ifr) < 0) {
@@ -64,6 +66,7 @@ Interface::~Interface() {
 }
 
 void *Interface::Sniff() {
+        std::cout << "Sniffing ... " << std::endl;
 	char buffer[65535];
 	struct arp_header *arp_rply;
 	char mac[20];
@@ -75,6 +78,8 @@ void *Interface::Sniff() {
 	arp_rply = (struct arp_header *)((struct packet*)(buffer+14));
 
 		while(1) {
+ 			
+                        std::cout << "Sniffing while ... " << std::endl;
 			r = recv(m_sockfd, buffer, sizeof(buffer), 0);
 			if(((((buffer[12])<<8)+buffer[13])!=ETH_P_ARP) && ntohs(arp_rply->op)!=2)
 				continue;
@@ -144,6 +149,7 @@ void *Interface::Generate() {
 	d = strtok (NULL, "."); /* 4th ip octect */
 
 	sprintf(net, "%s.%s.%s", a, b, c);
+        std::cout << "Generating ARP ... " << std::endl;
 
 	int n;
 	//iterate over all arguments

@@ -50,8 +50,8 @@ class Interface {
 		int m_sockfd;
 		int m_index;
 		std::string m_name;
-		std::string	m_ip;
-		std::string m_mac;
+		char m_ip[16];
+		unsigned char m_mac[6];
 };
 
 #endif /* INTERFACE_H_ */
