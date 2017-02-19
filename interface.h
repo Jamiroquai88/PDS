@@ -47,7 +47,7 @@ class Interface {
 		char m_ip[16];
 		unsigned char m_mac[6];
 
-		std::vector<Host> m_hosts;
+		std::vector<Host*> m_hosts;
 };
 
 #endif /* INTERFACE_H_ */

@@ -90,12 +90,12 @@ void *Interface::Sniff() {
 					arp_rply->smac[0], arp_rply->smac[1],
 					arp_rply->smac[2], arp_rply->smac[3],
 					arp_rply->smac[4], arp_rply->smac[5]);
-			std::cout << "State: " << i.m_ipv4 << " " << i.m_mac << std::endl;
-			if (strncmp(i.m_ipv4, ipv4, 16) && strncmp(i.m_mac, mac, 20))
+			std::cout << "State: " << i->m_ipv4 << " " << i->m_mac << std::endl;
+			if (strncmp(i->m_ipv4, ipv4, 16) && strncmp(i->m_mac, mac, 20))
 				break;
 		}
 		std::cout << "Pushing " << ipv4 << " " << mac << " size " << m_hosts.size() << std::endl;
-		m_hosts.push_back(Host(ipv4, mac));
+		m_hosts.push_back(new Host(ipv4, mac));
 
 //		printf("%u.%u.%u.%u\t",
 //				arp_rply->sip[0], arp_rply->sip[1],
