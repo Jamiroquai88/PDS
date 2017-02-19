@@ -55,8 +55,8 @@ Interface::Interface(std::string name) : m_sockfd(0), m_index(0) {
 			}
 		}
 		ifa = ifa->ifa_next;
-		close(m_sockfd);
 	}
+	close(m_sockfd);
 }
 
 Interface::~Interface() {
