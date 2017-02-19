@@ -137,7 +137,7 @@ void *Interface::Generate() {
 	tnet = (char *) malloc ((sizeof(char)) * 16);
 	toip = (char *) malloc ((sizeof(char)) * 16);
 
-	sprintf(tnet, "%s", m_ip);
+	sprintf(tnet, "%s", m_ip.c_str());
 	a = strtok (tnet, "."); /* 1st ip octect */
 	b = strtok (NULL, "."); /* 2nd ip octect */
 	c = strtok (NULL, "."); /* 3rd ip octect */
