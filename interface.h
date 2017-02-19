@@ -20,6 +20,9 @@
 #include <stdio.h>
 #include <signal.h>
 #include <pthread.h>
+#include <vector>
+
+#include "host.h"
 
 /**
  * Class Interface represent current active interface.
@@ -43,6 +46,8 @@ class Interface {
 		std::string m_name;
 		char m_ip[16];
 		unsigned char m_mac[6];
+
+		std::vector<Host> m_hosts;
 };
 
 #endif /* INTERFACE_H_ */

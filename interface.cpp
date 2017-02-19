@@ -74,6 +74,7 @@ void *Interface::Sniff() {
 	char buffer[65535];
 	struct arp_header *arp_rply;
 	char mac[20];
+	char ipv4[16];
 
 	arp_rply = (struct arp_header *)((struct packet*)(buffer+14));
 
@@ -81,6 +82,20 @@ void *Interface::Sniff() {
 		recv(m_sockfd, buffer, sizeof(buffer), 0);
 		if(((((buffer[12])<<8)+buffer[13])!=ETH_P_ARP) && ntohs(arp_rply->op)!=2)
 			continue;
+
+		for (auto &i : m_hosts) {
+			sprintf(ipv4, "%u.%u.%u.%u", arp_rply->sip[0], arp_rply->sip[1],
+					arp_rply->sip[2], arp_rply->sip[3]);
+			sprintf(mac,"%02x:%02x:%02x:%02x:%02x:%02x",
+					arp_rply->smac[0], arp_rply->smac[1],
+					arp_rply->smac[2], arp_rply->smac[3],
+					arp_rply->smac[4], arp_rply->smac[5]);
+			if (strncmp(i.m_ipv4, ipv4, 16) || strncmp(i.m_mac, mac, 20))
+				break;
+		}
+		m_hosts.push_back(Host(ipv4, mac));
+		for (auto &i : m_hosts)
+			std::cout << i.m_ipv4 << " " << i.m_mac << std::endl;
 
 		printf("%u.%u.%u.%u\t",
 				arp_rply->sip[0], arp_rply->sip[1],
@@ -145,11 +160,13 @@ void *Interface::Generate() {
 	sprintf(net, "%s.%s.%s", a, b, c);
 
 	int n;
-	for(i = 1; i <= 255; i++) {
-		sprintf(toip,"%s.%i", net, i);
-		inet_pton (AF_INET, toip, arp_header->dip);
-		if((n = sendto(m_sockfd, &eth_frame, 64, 0, (struct sockaddr *) &device, sizeof(device))) <= 0)
-			print_msg_and_abort("failed to send\n");
+	while (1) {
+		for(i = 1; i <= 255; i++) {
+			sprintf(toip,"%s.%i", net, i);
+			inet_pton(AF_INET, toip, arp_header->dip);
+			if((n = sendto(m_sockfd, &eth_frame, 64, 0, (struct sockaddr *) &device, sizeof(device))) <= 0)
+				print_msg_and_abort("failed to send\n");
+		}
 	}
 	return 0;
 }
