@@ -43,7 +43,7 @@ Interface::Interface(std::string name) : m_sockfd(0), m_index(0) {
 					print_msg_and_abort("ioctl SIOCGIFHWADDR failed");
 				}
 				memcpy(m_mac, ifr.ifr_hwaddr.sa_data, 6);
-				printf("Interface MAC: %02x:%02x:%02x:%02x:%02x:%02x", m_mac[0], m_mac[1],
+				printf("Interface MAC: %02x:%02x:%02x:%02x:%02x:%02x\n", m_mac[0], m_mac[1],
 						m_mac[2], m_mac[3], m_mac[4], m_mac[5]);
 
 				if (ioctl(m_sockfd, SIOCGIFINDEX, &ifr) < 0) {
@@ -64,8 +64,11 @@ Interface::~Interface() {
 
 }
 
+/**
+ * @brief Sniff for communication.
+ * based on: http://divingintolinux.sanupdas.com/?p=239
+ */
 void *Interface::Sniff() {
-        std::cout << "Sniffing ... " << std::endl;
 	char buffer[65535];
 	struct arp_header *arp_rply;
 	char mac[20];
@@ -76,35 +79,35 @@ void *Interface::Sniff() {
 
 	arp_rply = (struct arp_header *)((struct packet*)(buffer+14));
 
-		while(1) {
- 			
-                        std::cout << "Sniffing while ... " << std::endl;
-			r = recv(m_sockfd, buffer, sizeof(buffer), 0);
-			if(((((buffer[12])<<8)+buffer[13])!=ETH_P_ARP) && ntohs(arp_rply->op)!=2)
-				continue;
+	while(1) {
+		r = recv(m_sockfd, buffer, sizeof(buffer), 0);
+		if(((((buffer[12])<<8)+buffer[13])!=ETH_P_ARP) && ntohs(arp_rply->op)!=2)
+			continue;
 
-			printf("%u.%u.%u.%u\t",
-					arp_rply->sip[0], arp_rply->sip[1],
-					arp_rply->sip[2], arp_rply->sip[3]);
+		printf("%u.%u.%u.%u\t",
+				arp_rply->sip[0], arp_rply->sip[1],
+				arp_rply->sip[2], arp_rply->sip[3]);
 
-			sprintf(mac,"%02x:%02x:%02x:%02x:%02x:%02x",
-					arp_rply->smac[0], arp_rply->smac[1],
-					arp_rply->smac[2], arp_rply->smac[3],
-					arp_rply->smac[4], arp_rply->smac[5]);
-			printf("%s\t", mac);
+		sprintf(mac,"%02x:%02x:%02x:%02x:%02x:%02x",
+				arp_rply->smac[0], arp_rply->smac[1],
+				arp_rply->smac[2], arp_rply->smac[3],
+				arp_rply->smac[4], arp_rply->smac[5]);
 
-			sprintf(vendor,"%02x%02x%02x%02x%02x%02x",
-					arp_rply->smac[0], arp_rply->smac[1],
-					arp_rply->smac[2], arp_rply->smac[3],
-					arp_rply->smac[4], arp_rply->smac[5]);
+		printf("%s\t", mac);
 
-//			printf("%s\n", get_vendor(vendor));
-		}
-		close(m_sockfd);
-		printf("calling exit\n");
-		exit(0);
+		sprintf(vendor,"%02x%02x%02x%02x%02x%02x",
+				arp_rply->smac[0], arp_rply->smac[1],
+				arp_rply->smac[2], arp_rply->smac[3],
+				arp_rply->smac[4], arp_rply->smac[5]);
+	}
+	close(m_sockfd);
+	exit(0);
 }
 
+/**
+ * @brief Generate communication.
+ * based on: http://divingintolinux.sanupdas.com/?p=239
+ */
 void *Interface::Generate() {
 	struct arp_header *arp_header;                             //build up the arp packet
 	char eth_frame[ETH_FRAME_LEN];				// ethernet packet
@@ -148,14 +151,12 @@ void *Interface::Generate() {
 	d = strtok (NULL, "."); /* 4th ip octect */
 
 	sprintf(net, "%s.%s.%s", a, b, c);
-        std::cout << "Generating ARP ... " << std::endl;
 
 	int n;
-	//iterate over all arguments
 	for(i = 1; i <= 255; i++) {
 		sprintf(toip,"%s.%i", net, i);
 		inet_pton (AF_INET, toip, arp_header->dip);
-		if(n = sendto(m_sockfd, &eth_frame, 64, 0, (struct sockaddr *) &device, sizeof(device)) <= 0)
+		if((n = sendto(m_sockfd, &eth_frame, 64, 0, (struct sockaddr *) &device, sizeof(device))) <= 0)
 			print_msg_and_abort("failed to send\n");
 
 		usleep(2 * 1000);
