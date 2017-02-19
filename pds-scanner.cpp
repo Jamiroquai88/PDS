@@ -48,6 +48,7 @@ int main(int argc, char * argv[] ) {
     signal(SIGINT, signal_callback_handler);
 
     Interface inface = Interface(interface_name);
+    inface.Sniff();
 
     return 0;
 }

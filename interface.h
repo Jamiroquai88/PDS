@@ -38,6 +38,8 @@ class Interface {
 		Interface(std::string name);
 		virtual ~Interface();
 
+		void Sniff();
+
 		/**
 		 * Class members.
 		 */
