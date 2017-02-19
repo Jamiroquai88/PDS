@@ -55,10 +55,9 @@ int main(int argc, char * argv[] ) {
     	print_msg_and_abort("socket() failed\n ");
     inface.m_sockfd = sockfd;
 
-    int sniffer, generator;
     pthread_t pt1, pt2;
-    sniffer = pthread_create(&pt1, NULL, &Interface::Sniff_helper, &inface);
-    generator = pthread_create(&pt2, NULL, &Interface::Generate_helper, &inface);
+    pthread_create(&pt1, NULL, &Interface::Sniff_helper, &inface);
+    pthread_create(&pt2, NULL, &Interface::Generate_helper, &inface);
 
     pthread_join(pt1,NULL);
 

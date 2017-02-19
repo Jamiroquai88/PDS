@@ -74,15 +74,11 @@ void *Interface::Sniff() {
 	char buffer[65535];
 	struct arp_header *arp_rply;
 	char mac[20];
-	struct sockaddr from;
-	char vendor[20];
-
-	int r = 0;
 
 	arp_rply = (struct arp_header *)((struct packet*)(buffer+14));
 
 	while(1) {
-		r = recv(m_sockfd, buffer, sizeof(buffer), 0);
+		recv(m_sockfd, buffer, sizeof(buffer), 0);
 		if(((((buffer[12])<<8)+buffer[13])!=ETH_P_ARP) && ntohs(arp_rply->op)!=2)
 			continue;
 
@@ -133,7 +129,7 @@ void *Interface::Generate() {
 	memcpy(arp_header->dmac,dmac,ETH_ALEN);			//Set destination mac in arp-header
 	bzero(arp_header->pad,18);				//Zero fill the packet until 64 bytes reached
 
-	char *a, *b, *c, *d;
+	char *a, *b, *c;
 	char *tnet, *net, *toip;
 	int i;
 
@@ -145,7 +141,6 @@ void *Interface::Generate() {
 	a = strtok (tnet, "."); /* 1st ip octect */
 	b = strtok (NULL, "."); /* 2nd ip octect */
 	c = strtok (NULL, "."); /* 3rd ip octect */
-	d = strtok (NULL, "."); /* 4th ip octect */
 
 	sprintf(net, "%s.%s.%s", a, b, c);
 
