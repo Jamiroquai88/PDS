@@ -52,7 +52,7 @@ int main(int argc, char * argv[] ) {
 
     int sockfd;
     if ((sockfd = socket(PF_PACKET, SOCK_RAW, htons(ETH_P_ALL))) < 0)
-    			print_msg_and_abort("socket() failed\n ");
+    	print_msg_and_abort("socket() failed\n ");
     inface.m_sockfd = sockfd;
 
     int sniffer, generator;

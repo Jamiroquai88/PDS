@@ -35,17 +35,16 @@ Interface::Interface(std::string name) : m_sockfd(0), m_index(0) {
 				std::cout << "Interface name: " << m_name << std::endl;
 
 				sa_in = (struct sockaddr_in *) ifa->ifa_addr;
-				m_ip = inet_ntoa(sa_in->sin_addr);
-				std::cout << "Interface ip: " << m_ip << std::endl;
+				memcpy(m_ip, inet_ntoa(sa_in->sin_addr), 16);
+				std::cout << "Interface IP: " << m_ip << std::endl;
 
 				if (ioctl(m_sockfd, SIOCGIFHWADDR, &ifr) < 0) {
 					freeifaddrs(ifa);
 					print_msg_and_abort("ioctl SIOCGIFHWADDR failed");
 				}
-				m_mac = ifr.ifr_hwaddr.sa_data;
-				iface->mac[0], iface->mac[1],
-                                iface->mac[2], iface->mac[3], iface->mac[4], iface->mac[5]
-				std::cout << "Interface mac: " << ifr.ifr_hwaddr.sa_data << std::endl;
+				memcpy(m_mac, ifr.ifr_hwaddr.sa_data, 6);
+				printf("Interface MAC: %02x:%02x:%02x:%02x:%02x:%02x", m_mac[0], m_mac[1],
+						m_mac[2], m_mac[3], m_mac[4], m_mac[5]);
 
 				if (ioctl(m_sockfd, SIOCGIFINDEX, &ifr) < 0) {
 					freeifaddrs(ifa);
@@ -115,13 +114,13 @@ void *Interface::Generate() {
 
 	device.sll_ifindex = m_index;
 	device.sll_family = AF_PACKET;
-	memcpy(device.sll_addr, m_mac.c_str(), 6 * sizeof (uint8_t));
+	memcpy(device.sll_addr, m_mac, 6 * sizeof (uint8_t));
 	device.sll_halen = htons(6);
 
 	eth_header = (struct ethhdr*)eth_frame;                 //build up the ethernet packet
 	memcpy(eth_header->h_dest, dmac, ETH_ALEN);
 	eth_header->h_proto=htons(0x0806);			//0x0806 for Address Resolution Packet
-	memcpy(eth_header->h_source, m_mac.c_str(),6);
+	memcpy(eth_header->h_source, m_mac, 6);
 
 	arp_header = (struct arp_header *)(eth_frame + ETH_HLEN);  //start address in mem
 	arp_header->hrd = htons(0x0001);                        //0x0001 for 802.3 Frames
@@ -129,8 +128,8 @@ void *Interface::Generate() {
 	arp_header->hrd_add_len = ETH_ALEN;                     // 6 for eth-mac addr
 	arp_header->proto_add_len = 4;                          //4 for IPv4 addr
 	arp_header->op = htons(0x0001);				//0x0001 for ARP Request
-	inet_pton(AF_INET, m_ip.c_str(), arp_header->sip);
-	memcpy(arp_header->smac, m_mac.c_str(), 6);
+	inet_pton(AF_INET, m_ip, arp_header->sip);
+	memcpy(arp_header->smac, m_mac, 6);
 	memcpy(arp_header->dmac,dmac,ETH_ALEN);			//Set destination mac in arp-header
 	bzero(arp_header->pad,18);				//Zero fill the packet until 64 bytes reached
 
@@ -142,7 +141,7 @@ void *Interface::Generate() {
 	tnet = (char *) malloc ((sizeof(char)) * 16);
 	toip = (char *) malloc ((sizeof(char)) * 16);
 
-	sprintf(tnet, "%s", m_ip.c_str());
+	sprintf(tnet, "%s", m_ip);
 	a = strtok (tnet, "."); /* 1st ip octect */
 	b = strtok (NULL, "."); /* 2nd ip octect */
 	c = strtok (NULL, "."); /* 3rd ip octect */
