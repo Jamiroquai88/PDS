@@ -93,18 +93,18 @@ void *Interface::Sniff() {
 			if (strncmp(i.m_ipv4, ipv4, 16) || strncmp(i.m_mac, mac, 20))
 				break;
 		}
+		std::cout << "Pushing " << ipv4 << " " << mac << std::endl;
 		m_hosts.push_back(Host(ipv4, mac));
-		for (auto &i : m_hosts)
-			std::cout << i.m_ipv4 << " " << i.m_mac << std::endl;
 
-		printf("%u.%u.%u.%u\t",
-				arp_rply->sip[0], arp_rply->sip[1],
-				arp_rply->sip[2], arp_rply->sip[3]);
 
-		sprintf(mac,"%02x:%02x:%02x:%02x:%02x:%02x",
-				arp_rply->smac[0], arp_rply->smac[1],
-				arp_rply->smac[2], arp_rply->smac[3],
-				arp_rply->smac[4], arp_rply->smac[5]);
+//		printf("%u.%u.%u.%u\t",
+//				arp_rply->sip[0], arp_rply->sip[1],
+//				arp_rply->sip[2], arp_rply->sip[3]);
+//
+//		sprintf(mac,"%02x:%02x:%02x:%02x:%02x:%02x",
+//				arp_rply->smac[0], arp_rply->smac[1],
+//				arp_rply->smac[2], arp_rply->smac[3],
+//				arp_rply->smac[4], arp_rply->smac[5]);
 
 		printf("%s\n", mac);
 	}
