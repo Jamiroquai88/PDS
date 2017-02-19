@@ -9,22 +9,13 @@
 #define INTERFACE_H_
 
 #include <string>
-#include <sys/socket.h>
 #include <sys/ioctl.h>
-#include <linux/if_ether.h>
 #include <net/if.h>
-#include <netdb.h>
-#include <netinet/in.h>
-#include <linux/ip.h>
-#include <linux/udp.h>
-#include <linux/tcp.h>
 #include <arpa/inet.h>
 #include <ifaddrs.h>
 #include <linux/if_packet.h>
 #include <net/ethernet.h>
 #include <unistd.h>
-#include <stdint.h>
-#include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
 #include <signal.h>

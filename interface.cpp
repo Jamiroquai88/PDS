@@ -18,8 +18,10 @@ Interface::Interface(std::string name) : m_sockfd(0), m_index(0) {
 	struct sockaddr_in *sa_in = NULL;
 	struct ifreq ifr;
 
-	if ((m_sockfd = socket(AF_INET, SOCK_RAW, htons(IPPROTO_RAW))) < 0)
-	    	print_msg_and_abort("socket() failed");
+	if ((m_sockfd = socket(AF_INET, SOCK_RAW, IPPROTO_RAW)) < 0) {
+		perror(NULL);
+		print_msg_and_abort("socket() failed");
+	}
 
 	if (getifaddrs(&ifa) < 0) {
 		print_msg_and_abort("getifaddrs failed");
