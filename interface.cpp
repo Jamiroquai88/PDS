@@ -83,14 +83,16 @@ void *Interface::Sniff() {
 		if(((((buffer[12])<<8)+buffer[13])!=ETH_P_ARP) && ntohs(arp_rply->op)!=2)
 			continue;
 
+		sprintf(ipv4, "%u.%u.%u.%u", arp_rply->sip[0], arp_rply->sip[1],
+				arp_rply->sip[2], arp_rply->sip[3]);
+		sprintf(mac,"%02x:%02x:%02x:%02x:%02x:%02x",
+				arp_rply->smac[0], arp_rply->smac[1],
+				arp_rply->smac[2], arp_rply->smac[3],
+				arp_rply->smac[4], arp_rply->smac[5]);
+
 		for (auto &i : m_hosts) {
 			usleep(2000000);
-			sprintf(ipv4, "%u.%u.%u.%u", arp_rply->sip[0], arp_rply->sip[1],
-					arp_rply->sip[2], arp_rply->sip[3]);
-			sprintf(mac,"%02x:%02x:%02x:%02x:%02x:%02x",
-					arp_rply->smac[0], arp_rply->smac[1],
-					arp_rply->smac[2], arp_rply->smac[3],
-					arp_rply->smac[4], arp_rply->smac[5]);
+
 			std::cout << "State: " << i->m_ipv4 << " " << i->m_mac << std::endl;
 			if (strncmp(i->m_ipv4, ipv4, 16) && strncmp(i->m_mac, mac, 20))
 				break;
