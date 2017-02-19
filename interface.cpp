@@ -83,8 +83,14 @@ void *Interface::Sniff() {
 		if(((((buffer[12])<<8)+buffer[13])!=ETH_P_ARP) && ntohs(arp_rply->op)!=2)
 			continue;
 
+		char *begin = ipv4;
+		char *end = begin + sizeof(ipv4);
+		std::fill(begin, end, 0);
 		sprintf(ipv4, "%u.%u.%u.%u", arp_rply->sip[0], arp_rply->sip[1],
 				arp_rply->sip[2], arp_rply->sip[3]);
+		begin = mac;
+		end = begin + sizeof(mac);
+		std::fill(begin, end, 0);
 		sprintf(mac,"%02x:%02x:%02x:%02x:%02x:%02x",
 				arp_rply->smac[0], arp_rply->smac[1],
 				arp_rply->smac[2], arp_rply->smac[3],
