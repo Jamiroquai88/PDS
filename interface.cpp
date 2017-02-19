@@ -17,7 +17,7 @@ Interface::Interface(std::string name) : m_sockfd(0), m_index(0) {
 	struct sockaddr_in *sa_in = NULL;
 	struct ifreq ifr;
 
-	if ((m_sockfd = socket(AF_INET, SOCK_RAW, htons(IPPROTO_RAW))) < 0)
+	if ((m_sockfd = socket(AF_PACKET, SOCK_DGRAM, htons(0x0806))) < 0)
 	    	print_msg_and_abort("socket() failed");
 
 	if (getifaddrs(&ifa) < 0) {
@@ -25,7 +25,7 @@ Interface::Interface(std::string name) : m_sockfd(0), m_index(0) {
 	}
 
 	while (ifa != NULL) {
-		if (ifa->ifa_addr->sa_family == AF_INET) {
+		if (ifa->ifa_addr->sa_family == AF_PACKET) {
 			strcpy(ifr.ifr_name, ifa->ifa_name);
 			if (ioctl(m_sockfd, SIOCGIFFLAGS, &ifr) && !ifr.ifr_flags & (IFF_UP|IFF_RUNNING))
 				continue;
@@ -54,6 +54,7 @@ Interface::Interface(std::string name) : m_sockfd(0), m_index(0) {
 			}
 		}
 		ifa = ifa->ifa_next;
+		close(m_sockfd);
 	}
 }
 
