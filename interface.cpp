@@ -95,12 +95,7 @@ void *Interface::Sniff() {
 				arp_rply->smac[2], arp_rply->smac[3],
 				arp_rply->smac[4], arp_rply->smac[5]);
 
-		printf("%s\t", mac);
-
-		sprintf(vendor,"%02x%02x%02x%02x%02x%02x",
-				arp_rply->smac[0], arp_rply->smac[1],
-				arp_rply->smac[2], arp_rply->smac[3],
-				arp_rply->smac[4], arp_rply->smac[5]);
+		printf("%s\n", mac);
 	}
 	close(m_sockfd);
 	exit(0);
@@ -161,7 +156,7 @@ void *Interface::Generate() {
 		if((n = sendto(m_sockfd, &eth_frame, 64, 0, (struct sockaddr *) &device, sizeof(device))) <= 0)
 			print_msg_and_abort("failed to send\n");
 
-		usleep(2 * 1000);
+		usleep(200 * 1000);
 	}
 	return 0;
 }
