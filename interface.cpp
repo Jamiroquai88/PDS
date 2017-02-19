@@ -102,7 +102,59 @@ void *Interface::Sniff() {
 }
 
 void *Interface::Generate() {
-	while (1) {};
+	struct arp_header *arp_header;                             //build up the arp packet
+	char eth_frame[ETH_FRAME_LEN];				// ethernet packet
+	struct ethhdr *eth_header;				//build up ethernet header, from if_ether.h
+	unsigned char dmac[ETH_ALEN] = {0xFF,0xFF,0xFF,0xFF,0xFF,0xFF};    //Ethernet dest. Address
+	struct sockaddr_ll device;
+
+	device.sll_ifindex = m_index;
+	device.sll_family = AF_PACKET;
+	memcpy(device.sll_addr, m_mac.c_str(), 6 * sizeof (uint8_t));
+	device.sll_halen = htons(6);
+
+	eth_header = (struct ethhdr*)eth_frame;                 //build up the ethernet packet
+	memcpy(eth_header->h_dest, dmac, ETH_ALEN);
+	eth_header->h_proto=htons(0x0806);			//0x0806 for Address Resolution Packet
+	memcpy(eth_header->h_source, m_mac.c_str(),6);
+
+	arp_header = (struct arp_header *)(eth_frame + ETH_HLEN);  //start address in mem
+	arp_header->hrd = htons(0x0001);                        //0x0001 for 802.3 Frames
+	arp_header->proto = htons (0x0800);
+	arp_header->hrd_add_len = ETH_ALEN;                     // 6 for eth-mac addr
+	arp_header->proto_add_len = 4;                          //4 for IPv4 addr
+	arp_header->op = htons(0x0001);				//0x0001 for ARP Request
+	inet_pton(AF_INET, m_ip.c_str(), arp_header->sip);
+	memcpy(arp_header->smac, m_mac.c_str(), 6);
+	memcpy(arp_header->dmac,dmac,ETH_ALEN);			//Set destination mac in arp-header
+	bzero(arp_header->pad,18);				//Zero fill the packet until 64 bytes reached
+
+	char *a, *b, *c, *d;
+	char *tnet, *net, *toip;
+	int i;
+
+	net = (char *) malloc ((sizeof(char)) * 16);
+	tnet = (char *) malloc ((sizeof(char)) * 16);
+	toip = (char *) malloc ((sizeof(char)) * 16);
+
+	sprintf(tnet, "%s", m_ip);
+	a = strtok (tnet, "."); /* 1st ip octect */
+	b = strtok (NULL, "."); /* 2nd ip octect */
+	c = strtok (NULL, "."); /* 3rd ip octect */
+	d = strtok (NULL, "."); /* 4th ip octect */
+
+	sprintf(net, "%s.%s.%s", a, b, c);
+
+	int n;
+	//iterate over all arguments
+	for(i = 1; i <= 255; i++) {
+		sprintf(toip,"%s.%i", net, i);
+		inet_pton (AF_INET, toip, arp_header->dip);
+		if(n = sendto(m_sockfd, &eth_frame, 64, 0, (struct sockaddr *) &device, sizeof(device)) <= 0)
+			print_msg_and_abort("failed to send\n");
+
+		usleep(2 * 1000);
+	}
 	return 0;
 }
 
