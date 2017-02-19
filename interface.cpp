@@ -83,11 +83,12 @@ void *Interface::Sniff() {
 		if(((((buffer[12])<<8)+buffer[13])!=ETH_P_ARP) && ntohs(arp_rply->op)!=2)
 			continue;
 
-		char *begin = ipv4;
-		char *end = begin + sizeof(ipv4);
-		std::fill(begin, end, 0);
+
 		sprintf(ipv4, "%u.%u.%u.%u", arp_rply->sip[0], arp_rply->sip[1],
 				arp_rply->sip[2], arp_rply->sip[3]);
+		char *begin = ipv4 + sizeof(char) * strlen(ipv4);
+		char *end = begin + sizeof(ipv4) - sizeof(char) * strlen(ipv4);
+		std::fill(begin, end, 0);
 		begin = mac;
 		end = begin + sizeof(mac);
 		std::fill(begin, end, 0);
@@ -101,7 +102,7 @@ void *Interface::Sniff() {
 			usleep(2000000);
 
 			std::cout << "State: " << k++ << " " << i->m_ipv4 << " " << i->m_mac << std::endl;
-			if (strncmp(i->m_ipv4, ipv4, 16) == 0 && strncmp(i->m_mac, mac, 20) == 0)
+			if (strncmp(i->m_ipv4, ipv4, 16) == 0 || strncmp(i->m_mac, mac, 20) == 0)
 				break;
 		}
 		std::cout << "Pushing " << ipv4 << " " << mac << " size " << m_hosts.size() << std::endl;
