@@ -90,6 +90,7 @@ void *Interface::Sniff() {
 					arp_rply->smac[0], arp_rply->smac[1],
 					arp_rply->smac[2], arp_rply->smac[3],
 					arp_rply->smac[4], arp_rply->smac[5]);
+			std::cout << "State: " << i.m_ipv4 << " " << i.m_mac << std::endl;
 			if (strncmp(i.m_ipv4, ipv4, 16) && strncmp(i.m_mac, mac, 20))
 				break;
 		}
