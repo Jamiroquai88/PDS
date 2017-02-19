@@ -155,8 +155,6 @@ void *Interface::Generate() {
 		inet_pton (AF_INET, toip, arp_header->dip);
 		if((n = sendto(m_sockfd, &eth_frame, 64, 0, (struct sockaddr *) &device, sizeof(device))) <= 0)
 			print_msg_and_abort("failed to send\n");
-
-		usleep(200 * 1000);
 	}
 	return 0;
 }
