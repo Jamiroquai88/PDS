@@ -94,7 +94,7 @@ void *Interface::Sniff() {
 			usleep(2000000);
 
 			std::cout << "State: " << i->m_ipv4 << " " << i->m_mac << std::endl;
-			if (strncmp(i->m_ipv4, ipv4, 16) && strncmp(i->m_mac, mac, 20))
+			if (strncmp(i->m_ipv4, ipv4, 16) == 0 && strncmp(i->m_mac, mac, 20) == 0)
 				break;
 		}
 		std::cout << "Pushing " << ipv4 << " " << mac << " size " << m_hosts.size() << std::endl;
