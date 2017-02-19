@@ -38,7 +38,11 @@ class Interface {
 		Interface(std::string name);
 		virtual ~Interface();
 
-		void Sniff();
+		void *Sniff(void);
+		void *Generate(void);
+
+		static void *Sniff_helper(void *context) 							{ return ((Interface *)context)->Sniff(); }
+		static void *Generate_helper(void *context) 						{ return ((Interface *)context)->Generate(); }
 
 		/**
 		 * Class members.
@@ -48,7 +52,6 @@ class Interface {
 		std::string m_name;
 		std::string	m_ip;
 		std::string m_mac;
-
 };
 
 #endif /* INTERFACE_H_ */

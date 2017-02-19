@@ -45,10 +45,24 @@ int main(int argc, char * argv[] ) {
 
     if (getuid() && geteuid())
     	print_msg_and_abort("You must be root to run this.");
+
     signal(SIGINT, signal_callback_handler);
 
     Interface inface = Interface(interface_name);
-    inface.Sniff();
+
+    int sockfd;
+    if ((sockfd = socket(PF_PACKET, SOCK_RAW, htons(ETH_P_ALL))) < 0)
+    			print_msg_and_abort("socket() failed\n ");
+    inface.m_sockfd = sockfd;
+
+    int sniffer, generator;
+    pthread_t pt1, pt2;
+    sniffer = pthread_create(&pt1, NULL, &Interface::Sniff_helper, &inface);
+    generator = pthread_create(&pt2, NULL, &Interface::Generate_helper, &inface);
+
+    pthread_join(pt1,NULL);
+
+    close(sockfd);
 
     return 0;
 }

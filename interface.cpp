@@ -28,7 +28,7 @@ Interface::Interface(std::string name) : m_sockfd(0), m_index(0) {
 	while (ifa != NULL) {
 		if (ifa->ifa_addr->sa_family == AF_INET) {
 			strcpy(ifr.ifr_name, ifa->ifa_name);
-			if (ioctl(m_sockfd, SIOCGIFFLAGS, &ifr) && !ifr.ifr_flags & (IFF_UP|IFF_RUNNING))
+			if (ioctl(m_sockfd, SIOCGIFFLAGS, &ifr) && (!ifr.ifr_flags & (IFF_UP|IFF_RUNNING)))
 				continue;
 			if (name == ifa->ifa_name) {
 				m_name = ifa->ifa_name;
@@ -63,10 +63,7 @@ Interface::~Interface() {
 
 }
 
-void Interface::Sniff() {
-	if ((m_sockfd = socket(PF_PACKET, SOCK_RAW, htons(ETH_P_ALL))) < 0)
-			print_msg_and_abort("socket() failed\n ");
-
+void *Interface::Sniff() {
 	char buffer[65535];
 	struct arp_header *arp_rply;
 	char mac[20];
@@ -77,7 +74,7 @@ void Interface::Sniff() {
 
 	arp_rply = (struct arp_header *)((struct packet*)(buffer+14));
 
-		while(1){
+		while(1) {
 			r = recv(m_sockfd, buffer, sizeof(buffer), 0);
 			if(((((buffer[12])<<8)+buffer[13])!=ETH_P_ARP) && ntohs(arp_rply->op)!=2)
 				continue;
@@ -102,5 +99,10 @@ void Interface::Sniff() {
 		close(m_sockfd);
 		printf("calling exit\n");
 		exit(0);
+}
+
+void *Interface::Generate() {
+	while (1) {};
+	return 0;
 }
 
