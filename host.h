@@ -8,13 +8,15 @@
 #ifndef HOST_H_
 #define HOST_H_
 
+#include <string>
+
 class Host {
 public:
-	Host(char ipv4[16], char mac[20]);
+	Host(std::string ipv4, std::string mac);
 	virtual ~Host();
 
-	char m_ipv4[16];
-	char m_mac[20];
+	std::string m_ipv4;
+	std::string m_mac;
 };
 
 #endif /* HOST_H_ */
