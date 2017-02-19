@@ -12,8 +12,8 @@
 
 Host::Host(char ipv4[16], char mac[20]) {
 	std::cout << "Constructor" << ipv4 << " " << mac << std::endl;
-	strncpy(m_ipv4, ipv4, 16);
-	strncpy(m_mac, mac, 20);
+	strcpy(m_ipv4, ipv4);
+	strcpy(m_mac, mac);
 }
 
 Host::~Host() {
