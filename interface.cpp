@@ -73,10 +73,8 @@ Interface::~Interface() {
 void *Interface::Sniff() {
 	char buffer[65535];
 	struct arp_header *arp_rply;
-	std::string mac;
-	std::string ipv4;
-	char buff_ipv4[16];
-	char buff_mac[20];
+	unsigned char mac[6];
+	unsigned char ipv4[4];
 
 	arp_rply = (struct arp_header *)((struct packet*)(buffer+14));
 
@@ -85,22 +83,20 @@ void *Interface::Sniff() {
 		if(((((buffer[12])<<8)+buffer[13])!=ETH_P_ARP) && ntohs(arp_rply->op)!=2)
 			continue;
 
+//		sprintf(buff_ipv4, "%u.%u.%u.%u", arp_rply->sip[0], arp_rply->sip[1],
+//				arp_rply->sip[2], arp_rply->sip[3]);
+//		sprintf(buff_mac,"%02x:%02x:%02x:%02x:%02x:%02x",
+//				arp_rply->smac[0], arp_rply->smac[1],
+//				arp_rply->smac[2], arp_rply->smac[3],
+//				arp_rply->smac[4], arp_rply->smac[5]);
 
-		sprintf(buff_ipv4, "%u.%u.%u.%u", arp_rply->sip[0], arp_rply->sip[1],
-				arp_rply->sip[2], arp_rply->sip[3]);
-		ipv4 = buff_ipv4;
-		sprintf(buff_mac,"%02x:%02x:%02x:%02x:%02x:%02x",
-				arp_rply->smac[0], arp_rply->smac[1],
-				arp_rply->smac[2], arp_rply->smac[3],
-				arp_rply->smac[4], arp_rply->smac[5]);
-		mac = buff_mac;
 
 		int k = 0;
 		for (auto &i : m_hosts) {
 			usleep(2000000);
 
 			std::cout << "State: " << k++ << " " << i->m_ipv4 << " " << i->m_mac << std::endl;
-			if (i->m_ipv4 == ipv4 || i->m_mac == mac)
+			if (Interface::CompareUSChar(i->m_ipv4, ipv4, 4) == 0 || Interface::CompareUSChar(i->m_mac, mac, 6))
 				break;
 		}
 		std::cout << "Pushing " << ipv4 << " " << mac << " size " << m_hosts.size() << std::endl;
@@ -178,4 +174,14 @@ void *Interface::Generate() {
 	}
 	return 0;
 }
+
+int Interface::CompareUSChar(unsigned char * a, unsigned char * b, unsigned int size)
+{
+    unsigned int i;
+    for (i = 0; i < size; i++)
+    if (a[i] != b[i])
+        return 1;
+    return 0;
+}
+
 

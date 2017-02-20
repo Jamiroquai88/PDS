@@ -10,10 +10,9 @@
 #include <stdio.h>
 #include <string.h>
 
-Host::Host(std::string ipv4, std::string mac) {
-	std::cout << "Constructor " << ipv4 << " " << mac << std::endl;
-	m_ipv4 = ipv4;
-	m_mac = mac;
+Host::Host(unsigned char *ipv4, unsigned char *mac) {
+	memcpy(&m_ipv4, ipv4, sizeof(unsigned char) * 4);
+	memcpy(&m_mac, mac, sizeof(unsigned char) * 6);
 	std::cout << "Constructor2 " << m_ipv4 << " " << m_mac << std::endl;
 }
 

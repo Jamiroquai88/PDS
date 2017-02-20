@@ -38,6 +38,7 @@ class Interface {
 		static void *Sniff_helper(void *context) 							{ return ((Interface *)context)->Sniff(); }
 		static void *Generate_helper(void *context) 						{ return ((Interface *)context)->Generate(); }
 
+		static int CompareUSChar(unsigned char * a, unsigned char * b, unsigned int size);
 		/**
 		 * Class members.
 		 */
