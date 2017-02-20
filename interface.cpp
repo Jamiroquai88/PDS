@@ -94,7 +94,6 @@ void *Interface::Sniff() {
 		int k = 0;
 		for (auto &i : m_hosts) {
 			usleep(2000000);
-
 			std::cout << "State: " << k++ << " " << i->m_ipv4 << " " << i->m_mac << std::endl;
 			if (Interface::CompareUSChar(i->m_ipv4, ipv4, 4) == 0 || Interface::CompareUSChar(i->m_mac, mac, 6))
 				break;
