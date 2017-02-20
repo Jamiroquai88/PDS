@@ -83,13 +83,6 @@ void *Interface::Sniff() {
 		if(((((buffer[12])<<8)+buffer[13])!=ETH_P_ARP) && ntohs(arp_rply->op)!=2)
 			continue;
 
-//		sprintf(buff_ipv4, "%u.%u.%u.%u", arp_rply->sip[0], arp_rply->sip[1],
-//				arp_rply->sip[2], arp_rply->sip[3]);
-//		sprintf(buff_mac,"%02x:%02x:%02x:%02x:%02x:%02x",
-//				arp_rply->smac[0], arp_rply->smac[1],
-//				arp_rply->smac[2], arp_rply->smac[3],
-//				arp_rply->smac[4], arp_rply->smac[5]);
-
 		mac = arp_rply->smac;
 		ipv4 = arp_rply->sip;
 		int k = 0;
