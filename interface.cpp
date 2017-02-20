@@ -73,8 +73,8 @@ Interface::~Interface() {
 void *Interface::Sniff() {
 	char buffer[65535];
 	struct arp_header *arp_rply;
-	unsigned char mac[6];
-	unsigned char ipv4[4];
+	unsigned char *mac;
+	unsigned char *ipv4;
 
 	arp_rply = (struct arp_header *)((struct packet*)(buffer+14));
 
@@ -90,7 +90,8 @@ void *Interface::Sniff() {
 //				arp_rply->smac[2], arp_rply->smac[3],
 //				arp_rply->smac[4], arp_rply->smac[5]);
 
-
+		mac = arp_rply->smac;
+		ipv4 = arp_rply->sip;
 		int k = 0;
 		for (auto &i : m_hosts) {
 			usleep(2000000);
