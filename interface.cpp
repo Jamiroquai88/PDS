@@ -183,4 +183,11 @@ int Interface::CompareUSChar(unsigned char * a, unsigned char * b, unsigned int 
 	return 0;
 }
 
+void Interface::Free() {
+	for (auto &i : m_hosts) {
+		free(i->m_ipv4);
+		free(i->m_mac);
+		delete i;
+	}
 
+}

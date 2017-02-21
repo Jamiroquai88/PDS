@@ -13,12 +13,18 @@
 #include "errormsg.h"
 #include "interface.h"
 
+/**
+ * Global variable for memory cleaning.
+ */
+Interface *inface;
+
 /*
  * @brief Function to handle CTRL+C for exiting.
  */
 void signal_callback_handler(int signum)
 {
-	exit(-1);
+	inface->Free();
+	exit(0);
 }
 
 /**
@@ -48,12 +54,12 @@ int main(int argc, char * argv[] ) {
 
     signal(SIGINT, signal_callback_handler);
 
-    Interface inface = Interface(interface_name);
+    *inface = Interface(interface_name);
 
     int sockfd;
     if ((sockfd = socket(PF_PACKET, SOCK_RAW, htons(ETH_P_ALL))) < 0)
     	print_msg_and_abort("socket() failed\n ");
-    inface.m_sockfd = sockfd;
+    inface->m_sockfd = sockfd;
 
     pthread_t pt1, pt2;
     pthread_create(&pt1, NULL, &Interface::Sniff_helper, &inface);
