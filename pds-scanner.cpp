@@ -35,42 +35,42 @@ void signal_callback_handler(int signum)
  * @brief Main function for pds-scanner.
  */
 int main(int argc, char * argv[] ) {
-    std::string interface_name("");
-    int c;
-    while ((c = getopt (argc, argv, "i:f:")) != -1) {
-        switch (c) {
-            case 'i':
-            	interface_name = optarg;
-                break;
-            case 'f':
-                out_xml = optarg;
-                break;
-        }
-    }
-    if (interface_name.length() == 0 || out_xml.length() == 0) {
-    	print_help_scanner();
-    	print_msg_and_abort("Invalid parameters!");
-    }
+	std::string interface_name("");
+	int c;
+	while ((c = getopt (argc, argv, "i:f:")) != -1) {
+		switch (c) {
+			case 'i':
+				interface_name = optarg;
+				break;
+			case 'f':
+				out_xml = optarg;
+				break;
+		}
+	}
+	if (interface_name.length() == 0 || out_xml.length() == 0) {
+		print_help_scanner();
+		print_msg_and_abort("Invalid parameters!");
+	}
 
-    if (getuid() && geteuid())
-    	print_msg_and_abort("You must be root to run this.");
+	if (getuid() && geteuid())
+		print_msg_and_abort("You must be root to run this.");
 
-    signal(SIGINT, signal_callback_handler);
+	signal(SIGINT, signal_callback_handler);
 
-    inface = new Interface(interface_name);
+	inface = new Interface(interface_name);
 
-    int sockfd;
-    if ((sockfd = socket(PF_PACKET, SOCK_RAW, htons(ETH_P_ALL))) < 0)
-    	print_msg_and_abort("socket() failed\n ");
-    inface->m_sockfd = sockfd;
+	int sockfd;
+	if ((sockfd = socket(PF_PACKET, SOCK_RAW, htons(ETH_P_ALL))) < 0)
+		print_msg_and_abort("socket() failed\n ");
+	inface->m_sockfd = sockfd;
 
-    pthread_t pt1, pt2;
-    pthread_create(&pt1, NULL, &Interface::Sniff_helper, inface);
-    pthread_create(&pt2, NULL, &Interface::Generate_helper, inface);
+	pthread_t pt1, pt2;
+	pthread_create(&pt1, NULL, &Interface::Sniff_helper, inface);
+	pthread_create(&pt2, NULL, &Interface::Generate_helper, inface);
 
-    pthread_join(pt2, NULL);
+	pthread_join(pt2, NULL);
 
 	close(sockfd);
 	signal_callback_handler(0);
-    	return 0;
+	return 0;
 }
