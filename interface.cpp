@@ -155,13 +155,11 @@ void *Interface::Generate() {
 	sprintf(net, "%s.%s.%s", a, b, c);
 
 	int n;
-	while (1) {
-		for(i = 1; i <= 255; i++) {
-			sprintf(toip,"%s.%i", net, i);
-			inet_pton(AF_INET, toip, arp_header->dip);
-			if((n = sendto(m_sockfd, &eth_frame, 64, 0, (struct sockaddr *) &device, sizeof(device))) <= 0)
-				print_msg_and_abort("failed to send\n");
-		}
+	for(i = 1; i <= 255; i++) {
+		sprintf(toip,"%s.%i", net, i);
+		inet_pton(AF_INET, toip, arp_header->dip);
+		if((n = sendto(m_sockfd, &eth_frame, 64, 0, (struct sockaddr *) &device, sizeof(device))) <= 0)
+			print_msg_and_abort("failed to send\n");
 	}
 	return 0;
 }

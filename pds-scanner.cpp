@@ -59,7 +59,7 @@ int main(int argc, char * argv[] ) {
     pthread_create(&pt1, NULL, &Interface::Sniff_helper, &inface);
     pthread_create(&pt2, NULL, &Interface::Generate_helper, &inface);
 
-    pthread_join(pt1,NULL);
+    pthread_join(pt2, NULL);
 
     close(sockfd);
 
