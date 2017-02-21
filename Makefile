@@ -1,5 +1,6 @@
 CP=g++
-CPFLAGS=-std=c++11 -pthread -pedantic -Wall -O3 -g
+LIBXML=`xml2-config --cflags`
+CPFLAGS=-std=c++11 -pthread -pedantic -Wall -O3 -g $(LIBXML)
 CPP_FILES := $(wildcard *.cpp)
 OBJ_FILES := $(CPP_FILES:.cpp=.o)
 
