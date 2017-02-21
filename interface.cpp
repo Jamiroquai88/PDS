@@ -84,17 +84,16 @@ void *Interface::Sniff() {
 		if(((((buffer[12])<<8)+buffer[13])!=ETH_P_ARP) && ntohs(arp_rply->op)!=2)
 			continue;
 
-		#ifdef DEBUG
-			printf("Incoming IP: %u.%u.%u.%u, MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
-				arp_rply->sip[0], arp_rply->sip[1],
-				arp_rply->sip[2], arp_rply->sip[3],
-				arp_rply->smac[0], arp_rply->smac[1],
-				arp_rply->smac[2], arp_rply->smac[3],
-				arp_rply->smac[4], arp_rply->smac[5]);
-		#endif
+#ifdef DEBUG
+	printf("Incoming IP: %u.%u.%u.%u, MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
+			arp_rply->sip[0], arp_rply->sip[1],
+			arp_rply->sip[2], arp_rply->sip[3],
+			arp_rply->smac[0], arp_rply->smac[1],
+			arp_rply->smac[2], arp_rply->smac[3],
+			arp_rply->smac[4], arp_rply->smac[5]);
+#endif
  		exists = false;
 		for (auto &i : m_hosts) {
-			usleep(200000);
 			if (Interface::CompareUSChar(i->m_ipv4, arp_rply->sip, 4) == 0 && Interface::CompareUSChar(i->m_mac, arp_rply->smac, 6) == 0) {
 				exists = true;
 				break;
@@ -170,16 +169,18 @@ void *Interface::Generate() {
 int Interface::CompareUSChar(unsigned char * a, unsigned char * b, unsigned int size)
 {
 	unsigned int i;
-	#ifdef DEBUG
-        	if (size == 4) {
-			printf("Interface::CompareUSChar IPa: %u.%u.%u.%u\n", a[0], a[1], a[2], a[3]);
-			printf("Interface::CompareUSChar IPb: %u.%u.%u.%u\n", b[0], b[1], b[2], b[3]);
-		}
-		if (size == 6) {
-			printf("Interface::CompareUSChar MACa: %02x:%02x:%02x:%02x:%02x:%02x\n", a[0], a[1], a[2], a[3], a[4], a[5]);
-			printf("Interface::CompareUSChar MACb: %02x:%02x:%02x:%02x:%02x:%02x\n", a[0], a[1], a[2], a[3], a[4], a[5]);
-		}
-	#endif
+
+#ifdef DEBUG
+	if (size == 4) {
+		printf("Interface::CompareUSChar IPa: %u.%u.%u.%u\n", a[0], a[1], a[2], a[3]);
+		printf("Interface::CompareUSChar IPb: %u.%u.%u.%u\n", b[0], b[1], b[2], b[3]);
+	}
+	if (size == 6) {
+		printf("Interface::CompareUSChar MACa: %02x:%02x:%02x:%02x:%02x:%02x\n", a[0], a[1], a[2], a[3], a[4], a[5]);
+		printf("Interface::CompareUSChar MACb: %02x:%02x:%02x:%02x:%02x:%02x\n", a[0], a[1], a[2], a[3], a[4], a[5]);
+	}
+#endif
+
 	for (i = 0; i < size; i++)
     		if (a[i] != b[i])
 		return 1;
