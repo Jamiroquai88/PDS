@@ -155,6 +155,7 @@ void *Interface::Generate() {
 
 	int n;
 	for(i = 1; i <= 255; i++) {
+		usleep(2000);
 		sprintf(toip,"%s.%i", net, i);
 		inet_pton(AF_INET, toip, arp_header->dip);
 		if((n = sendto(m_sockfd, &eth_frame, 64, 0, (struct sockaddr *) &device, sizeof(device))) <= 0)
