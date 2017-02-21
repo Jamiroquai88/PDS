@@ -5,6 +5,10 @@
  *      Author: jose
  */
 
+#define DEBUG
+
+#include <iostream>
+
 #include "pdsxmlparser.h"
 
 PDSXMLParser::PDSXMLParser() {
@@ -18,6 +22,10 @@ void PDSXMLParser::DumpScan(const Interface *inface, const std::string filename)
 	xmlNodePtr root_node = NULL, node = NULL;/* node pointers */
 	char mac[20];
 	char ipv4[16];
+
+#ifdef DEBUG
+	std::cout << "Number of hosts: " << inface->m_hosts.size() << std::endl;
+#endif
 
 	doc = xmlNewDoc(BAD_CAST "1.0");
 	root_node = xmlNewNode(NULL, BAD_CAST "devices");
