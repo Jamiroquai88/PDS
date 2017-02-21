@@ -89,16 +89,19 @@ void *Interface::Sniff() {
 		mac = arp_rply->smac;
 		ipv4 = arp_rply->sip;
 		#ifdef DEBUG
-			printf("Incoming IP: %u.%u.%u.%u\t",
+			printf("Incoming IP: %u.%u.%u.%u, MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
 				arp_rply->sip[0], arp_rply->sip[1],
-				arp_rply->sip[2], arp_rply->sip[3]);
+				arp_rply->sip[2], arp_rply->sip[3],
+				arp_rply->smac[0], arp_rply->smac[1],
+				arp_rply->smac[2], arp_rply->smac[3],
+				arp_rply->smac[4], arp_rply->smac[5]);
 		#endif
 		int k = 0;
  		exists = false;
 		for (auto &i : m_hosts) {
 			usleep(2000000);
 			std::cout << "Vector index: " << k++ << std::endl;
-			if (Interface::CompareUSChar(i->m_ipv4, ipv4, 4) == 0 || Interface::CompareUSChar(i->m_mac, mac, 6)) {
+			if (Interface::CompareUSChar(i->m_ipv4, ipv4, 4) == 0 && Interface::CompareUSChar(i->m_mac, mac, 6)) {
 				exists = true;
 				break;
 			}
@@ -110,9 +113,6 @@ void *Interface::Sniff() {
 
 //
 //		sprintf(mac,"%02x:%02x:%02x:%02x:%02x:%02x",
-//				arp_rply->smac[0], arp_rply->smac[1],
-//				arp_rply->smac[2], arp_rply->smac[3],
-//				arp_rply->smac[4], arp_rply->smac[5]);
 
 	}
 	close(m_sockfd);
