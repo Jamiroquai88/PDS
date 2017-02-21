@@ -10,7 +10,7 @@
 #include "interface.h"
 #include "errormsg.h"
 #include "arpheader.h"
-
+#include <libxml/encoding.h>
 /**
  * Class constructor. Iterates through interfaces by name.
  * Based on: http://divingintolinux.sanupdas.com/?p=239
@@ -61,7 +61,6 @@ Interface::Interface(std::string name) : m_sockfd(0), m_index(0) {
 		}
 		ifa = ifa->ifa_next;
 	}
-	freeifaddrs(ifa);
 	close(m_sockfd);
 }
 
