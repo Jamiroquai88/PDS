@@ -62,8 +62,8 @@ int main(int argc, char * argv[] ) {
     inface->m_sockfd = sockfd;
 
     pthread_t pt1, pt2;
-    pthread_create(&pt1, NULL, &Interface::Sniff_helper, &inface);
-    pthread_create(&pt2, NULL, &Interface::Generate_helper, &inface);
+    pthread_create(&pt1, NULL, &Interface::Sniff_helper, inface);
+    pthread_create(&pt2, NULL, &Interface::Generate_helper, inface);
 
     pthread_join(pt2, NULL);
 
