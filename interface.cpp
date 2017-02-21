@@ -75,8 +75,6 @@ Interface::~Interface() {
 void *Interface::Sniff() {
 	char buffer[65535];
 	struct arp_header *arp_rply;
-	unsigned char *mac;
-	unsigned char *ipv4;
 
 	arp_rply = (struct arp_header *)((struct packet*)(buffer+14));
         bool exists = false;
@@ -86,8 +84,6 @@ void *Interface::Sniff() {
 		if(((((buffer[12])<<8)+buffer[13])!=ETH_P_ARP) && ntohs(arp_rply->op)!=2)
 			continue;
 
-		mac = arp_rply->smac;
-		ipv4 = arp_rply->sip;
 		#ifdef DEBUG
 			printf("Incoming IP: %u.%u.%u.%u, MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
 				arp_rply->sip[0], arp_rply->sip[1],
@@ -96,24 +92,16 @@ void *Interface::Sniff() {
 				arp_rply->smac[2], arp_rply->smac[3],
 				arp_rply->smac[4], arp_rply->smac[5]);
 		#endif
-		int k = 0;
  		exists = false;
 		for (auto &i : m_hosts) {
-			usleep(2000000);
-			std::cout << "Vector index: " << k++ << std::endl;
-			if (Interface::CompareUSChar(i->m_ipv4, ipv4, 4) == 0 && Interface::CompareUSChar(i->m_mac, mac, 6)) {
+			//usleep(2000000);
+			if (Interface::CompareUSChar(i->m_ipv4, arp_rply->sip, 4) == 0 && Interface::CompareUSChar(i->m_mac, arp_rply->smac, 6) == 0) {
 				exists = true;
 				break;
 			}
 		}
-		if (!exists) {
-			std::cout << "Pushing, size " << m_hosts.size() << std::endl;
-			m_hosts.push_back(new Host(ipv4, mac));
-		}
-
-//
-//		sprintf(mac,"%02x:%02x:%02x:%02x:%02x:%02x",
-
+		if (!exists)
+			m_hosts.push_back(new Host(arp_rply->sip, arp_rply->smac));
 	}
 	close(m_sockfd);
 	exit(0);
