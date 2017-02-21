@@ -24,6 +24,7 @@ Interface *inface;
 void signal_callback_handler(int signum)
 {
 	inface->Free();
+	delete inface;
 	exit(0);
 }
 

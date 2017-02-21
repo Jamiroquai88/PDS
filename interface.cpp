@@ -61,6 +61,7 @@ Interface::Interface(std::string name) : m_sockfd(0), m_index(0) {
 		}
 		ifa = ifa->ifa_next;
 	}
+	freeifaddrs(ifa);
 	close(m_sockfd);
 }
 
@@ -94,7 +95,7 @@ void *Interface::Sniff() {
 		#endif
  		exists = false;
 		for (auto &i : m_hosts) {
-			//usleep(2000000);
+			usleep(200000);
 			if (Interface::CompareUSChar(i->m_ipv4, arp_rply->sip, 4) == 0 && Interface::CompareUSChar(i->m_mac, arp_rply->smac, 6) == 0) {
 				exists = true;
 				break;
@@ -161,6 +162,9 @@ void *Interface::Generate() {
 		if((n = sendto(m_sockfd, &eth_frame, 64, 0, (struct sockaddr *) &device, sizeof(device))) <= 0)
 			print_msg_and_abort("failed to send\n");
 	}
+	free(net);
+	free(tnet);
+	free(toip);
 	return 0;
 }
 
@@ -185,8 +189,6 @@ int Interface::CompareUSChar(unsigned char * a, unsigned char * b, unsigned int 
 
 void Interface::Free() {
 	for (auto &i : m_hosts) {
-		free(i->m_ipv4);
-		free(i->m_mac);
 		delete i;
 	}
 
