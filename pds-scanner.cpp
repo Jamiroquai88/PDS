@@ -54,7 +54,7 @@ int main(int argc, char * argv[] ) {
 
     signal(SIGINT, signal_callback_handler);
 
-    *inface = Interface(interface_name);
+    inface = new Interface(interface_name);
 
     int sockfd;
     if ((sockfd = socket(PF_PACKET, SOCK_RAW, htons(ETH_P_ALL))) < 0)
