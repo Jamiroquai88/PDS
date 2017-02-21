@@ -12,17 +12,20 @@
 
 #include "errormsg.h"
 #include "interface.h"
+#include "pdsxmlparser.h"
 
 /**
  * Global variable for memory cleaning.
  */
-Interface *inface;
+Interface *inface = NULL;
+std::string out_xml("");
 
 /*
  * @brief Function to handle CTRL+C for exiting.
  */
 void signal_callback_handler(int signum)
 {
+	PDSXMLParser::DumpScan(inface, out_xml); 
 	inface->Free();
 	delete inface;
 	exit(0);
@@ -33,7 +36,6 @@ void signal_callback_handler(int signum)
  */
 int main(int argc, char * argv[] ) {
     std::string interface_name("");
-    std::string out_xml("");
     int c;
     while ((c = getopt (argc, argv, "i:f:")) != -1) {
         switch (c) {
@@ -68,7 +70,7 @@ int main(int argc, char * argv[] ) {
 
     pthread_join(pt2, NULL);
 
-    close(sockfd);
-
-    return 0;
+	close(sockfd);
+	signal_callback_handler(0);
+    	return 0;
 }
