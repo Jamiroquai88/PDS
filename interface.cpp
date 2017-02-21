@@ -5,6 +5,8 @@
  *      Author: jose
  */
 
+#define DEBUG
+
 #include "interface.h"
 #include "errormsg.h"
 #include "arpheader.h"
@@ -77,6 +79,7 @@ void *Interface::Sniff() {
 	unsigned char *ipv4;
 
 	arp_rply = (struct arp_header *)((struct packet*)(buffer+14));
+        bool exists = false;
 
 	while(1) {
 		recv(m_sockfd, buffer, sizeof(buffer), 0);
@@ -85,19 +88,26 @@ void *Interface::Sniff() {
 
 		mac = arp_rply->smac;
 		ipv4 = arp_rply->sip;
+		#ifdef DEBUG
+			printf("Incoming IP: %u.%u.%u.%u\t",
+				arp_rply->sip[0], arp_rply->sip[1],
+				arp_rply->sip[2], arp_rply->sip[3]);
+		#endif
 		int k = 0;
+ 		exists = false;
 		for (auto &i : m_hosts) {
 			usleep(2000000);
-			std::cout << "State: " << k++ << " " << i->m_ipv4 << " " << i->m_mac << std::endl;
-			if (Interface::CompareUSChar(i->m_ipv4, ipv4, 4) == 0 || Interface::CompareUSChar(i->m_mac, mac, 6))
+			std::cout << "Vector index: " << k++ << std::endl;
+			if (Interface::CompareUSChar(i->m_ipv4, ipv4, 4) == 0 || Interface::CompareUSChar(i->m_mac, mac, 6)) {
+				exists = true;
 				break;
+			}
 		}
-		std::cout << "Pushing " << ipv4 << " " << mac << " size " << m_hosts.size() << std::endl;
-		m_hosts.push_back(new Host(ipv4, mac));
+		if (!exists) {
+			std::cout << "Pushing, size " << m_hosts.size() << std::endl;
+			m_hosts.push_back(new Host(ipv4, mac));
+		}
 
-//		printf("%u.%u.%u.%u\t",
-//				arp_rply->sip[0], arp_rply->sip[1],
-//				arp_rply->sip[2], arp_rply->sip[3]);
 //
 //		sprintf(mac,"%02x:%02x:%02x:%02x:%02x:%02x",
 //				arp_rply->smac[0], arp_rply->smac[1],
@@ -170,11 +180,21 @@ void *Interface::Generate() {
 
 int Interface::CompareUSChar(unsigned char * a, unsigned char * b, unsigned int size)
 {
-    unsigned int i;
-    for (i = 0; i < size; i++)
-    if (a[i] != b[i])
-        return 1;
-    return 0;
+	unsigned int i;
+	#ifdef DEBUG
+        	if (size == 4) {
+			printf("Interface::CompareUSChar IPa: %u.%u.%u.%u\n", a[0], a[1], a[2], a[3]);
+			printf("Interface::CompareUSChar IPb: %u.%u.%u.%u\n", b[0], b[1], b[2], b[3]);
+		}
+		if (size == 6) {
+			printf("Interface::CompareUSChar MACa: %02x:%02x:%02x:%02x:%02x:%02x\n", a[0], a[1], a[2], a[3], a[4], a[5]);
+			printf("Interface::CompareUSChar MACb: %02x:%02x:%02x:%02x:%02x:%02x\n", a[0], a[1], a[2], a[3], a[4], a[5]);
+		}
+	#endif
+	for (i = 0; i < size; i++)
+    		if (a[i] != b[i])
+		return 1;
+	return 0;
 }
 
 

@@ -15,8 +15,8 @@ public:
 	Host(unsigned char *ipv4, unsigned char *mac);
 	virtual ~Host();
 
-	unsigned char *m_ipv4;
-	unsigned char *m_mac;
+	unsigned char m_ipv4[4];
+	unsigned char m_mac[6];
 };
 
 #endif /* HOST_H_ */
