@@ -5,12 +5,13 @@
  *      Author: jose
  */
 
-#define DEBUG
+//#define DEBUG
 
 #include "interface.h"
 #include "errormsg.h"
 #include "arpheader.h"
 #include <libxml/encoding.h>
+
 /**
  * Class constructor. Iterates through interfaces by name.
  * Based on: http://divingintolinux.sanupdas.com/?p=239

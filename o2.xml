@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<devices>
+  <host mac="88:f7:c7:cb:06:28" group="victim-pair-1">
+    <ipv4>192.168.0.1</ipv4>
+  </host>
+  <host mac="e0:94:67:a4:a1:00" group="victim-pair-2">
+    <ipv4>192.168.0.18</ipv4>
+  </host>
+  <host mac="38:d5:47:81:00:78" group="victim-pair-1">
+    <ipv4>192.168.0.23</ipv4>
+  </host>
+  <host mac="84:9f:b5:86:32:ad" group="victim-pair-2">
+    <ipv4>192.168.0.26</ipv4>
+  </host>
+</devices>

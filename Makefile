@@ -5,13 +5,16 @@ CPFLAGS=-std=c++11 -pthread -pedantic -Wall -O3 -g
 CPP_FILES := $(wildcard *.cpp)
 OBJ_FILES := $(CPP_FILES:.cpp=.o)
 
-all: pds-scanner
+all: pds-scanner pds-chooser
 
-pds-scanner: $(OBJ_FILES)
+pds-scanner: pds-scanner.o errormsg.o interface.o pdsxmlparser.o arpheader.o host.o
+	$(CP) $(CPFLAGS) $^ -o $@ $(LIBXMLFLAGS) $(LIBXMLLIB)  -lm
+
+pds-chooser: pds-chooser.o errormsg.o pdsxmlparser.o
 	$(CP) $(CPFLAGS) $^ -o $@ $(LIBXMLFLAGS) $(LIBXMLLIB)  -lm
 
 %.o:%.cpp
 	$(CP) $(CPFLAGS) -c $< -o $@ -I/usr/local/include $(LIBXMLFLAGS) $(LIBXMLLIB) -L/usr/local/lib64 -lm
 
 clean:
-	$(RM) pds-scanner $(OBJ_FILES) *.h.gch
+	$(RM) pds-scanner pds-chooser $(OBJ_FILES) *.h.gch

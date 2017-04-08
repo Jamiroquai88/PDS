@@ -1,0 +1,4 @@
+scanner:
+    IPv6
+    std::vector for IPv4 and IPv6
+    mask
