@@ -95,9 +95,11 @@ void *Interface::Sniff() {
 #endif
  		exists = false;
 		for (auto &i : m_hosts) {
-			if (Interface::CompareUSChar(i->m_ipv4, arp_rply->sip, 4) == 0 && Interface::CompareUSChar(i->m_mac, arp_rply->smac, 6) == 0) {
-				exists = true;
-				break;
+			for (auto &ipv4 : i->m_ipv4) {
+				if (Interface::CompareUSChar(ipv4, arp_rply->sip, 4) == 0 && Interface::CompareUSChar(i->m_mac, arp_rply->smac, 6) == 0) {
+					exists = true;
+					break;
+				}
 			}
 		}
 		if (!exists)

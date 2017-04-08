@@ -5,7 +5,7 @@
  *      Author: jose
  */
 
-#define DEBUG
+//#define DEBUG
 
 #include <iostream>
 #include "host.h"
@@ -14,8 +14,9 @@
 
 
 
-Host::Host(unsigned char *ipv4, unsigned char *mac) {
-	memcpy(m_ipv4, ipv4, sizeof(unsigned char) * 4);
+Host::Host(std::vector<unsigned char> ipv4, std::vector<unsigned char> ipv6, unsigned char *mac) {
+	m_ipv4 = ipv4;
+	m_ipv6 = ipv6;
 	memcpy(m_mac, mac, sizeof(unsigned char) * 6);
 	#ifdef DEBUG
 		printf("Host constructor IP: %u.%u.%u.%u, MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",

@@ -12,10 +12,11 @@
 
 class Host {
 public:
-	Host(unsigned char *ipv4, unsigned char *mac);
+	Host(std::vector<unsigned char> ipv4, std::vector<unsigned char> ipv6, unsigned char *mac);
 	virtual ~Host();
 
-	unsigned char m_ipv4[4];
+	std::vector<unsigned char [4]> m_ipv4;
+	std::vector<unsigned int [8]> m_ipv6[8];
 	unsigned char m_mac[6];
 };
 

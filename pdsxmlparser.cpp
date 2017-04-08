@@ -157,7 +157,6 @@ void PDSXMLParser::GroupPairs(xmlNodePtr rootNode, std::vector<unsigned int> pai
 			if (pos < pairs.size()) {
 				std::string tupIndex = SSTR(pos / 2 + 1);
 				tupIndex = "victim-pair-" + tupIndex;
-				std::cout << tupIndex;
 				xmlSetProp(node, (const xmlChar*)"group", (const xmlChar*)tupIndex.c_str());
 			}
 			i++;
