@@ -2,10 +2,8 @@
  * host.cpp
  *
  *  Created on: Feb 19, 2017
- *      Author: jose
+ *      Author: Jan Profant
  */
-
-#define DEBUG
 
 #include <iostream>
 #include "host.h"

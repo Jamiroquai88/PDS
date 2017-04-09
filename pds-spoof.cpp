@@ -12,20 +12,20 @@
 
 #include "errormsg.h"
 #include "interface.h"
+#include "spoofer.h"
 
 /**
  * Global variable for memory cleaning.
  */
-Interface *inface = NULL;
+Spoofer *p_spoofer = NULL;
 
-// Long command line options
-static struct option long_options[] = {
-	{"victim1ip", required_argument, 0, 0},
-	{"victim1mac", required_argument, 0, 0},
-	{"victim2ip", required_argument, 0, 0},
-	{"victim2mac", required_argument, 0, 0},
-	{0,0,0,0}
-};
+/*
+ * @brief Function to handle CTRL+C for exiting.
+ */
+void signal_callback_handler(int signum)
+{
+	delete p_spoofer;
+}
 
 /**
  * @brief Main function for pds-spoof.
@@ -34,11 +34,7 @@ int main(int argc, char * argv[] ) {
 	int c;
 	std::string interface_name(""), protocol(""), v1ip(""), v1mac(""), v2ip(""), v2mac("");
 	int time = 0;
-	while (1) {
-		int option_index = 0;
-		c = getopt_long (argc, argv, "i:t:p:", long_options, &option_index);
-		if (c == -1)
-			break;
+	while ((c = getopt(argc, argv, "i:t:p:v:")) != -1) {
 		switch (c) {
 			case 'i':
 				interface_name = optarg;
@@ -48,31 +44,54 @@ int main(int argc, char * argv[] ) {
 				break;
 			case 'p':
 				protocol = optarg;
+				if (protocol != "arp" && protocol != "ndp") {
+					print_help_spoof();
+					print_msg_and_abort("Invalid protocol type!");
+				}
 				break;
-			case 0:
-				if (long_options[option_index].flag != 0)
-					break;
-				if (strcmp(long_options[option_index].name, "victim1ip") == 0)
-					v1ip = optarg;
-				if (strcmp(long_options[option_index].name, "victim1mac") == 0)
-					v1mac = optarg;
-				if (strcmp(long_options[option_index].name, "victim2ip") == 0)
-					v2ip = optarg;
-				if (strcmp(long_options[option_index].name, "victim2mac") == 0)
-					v2mac = optarg;
+			case 'v':
+				for ( ;optind < argc && *argv[optind] != '-'; optind++) {
+					if (strcmp(optarg, "ictim1ip") == 0)
+						v1ip = argv[optind];
+					if (strcmp(optarg, "ictim1mac") == 0)
+						v1mac = argv[optind];
+					if (strcmp(optarg, "ictim2ip") == 0)
+						v2ip = argv[optind];
+					if (strcmp(optarg, "ictim2mac") == 0)
+						v2mac = argv[optind];
+				}
 				break;
 		}
 	}
-//	if (inet_pton(AF_INET, v1ip, ))
 		
-	if (interface_name.length() == 0 || protocol.length() == 0 || time <= 0) {
-		print_help_scanner();
+	if (	interface_name.length() == 0 || protocol.length() == 0 || time <= 0 ||
+			v1ip.length() == 0 || v1mac.length() == 0 || v2ip.length() == 0 || v2mac.length() == 0) {
+		print_help_spoof();
 		print_msg_and_abort("Invalid parameters!");
 	}
+
+	p_spoofer = new Spoofer();
+	p_spoofer->SetInterface(interface_name);
+	p_spoofer->SetInterval(time);
+	p_spoofer->SetProtocolType(protocol);
+	if (!p_spoofer->SetVictim1IP(v1ip))
+		print_msg_and_abort("Invalid IP address for victim1!");
+	if (!p_spoofer->SetVictim2IP(v2ip))
+		print_msg_and_abort("Invalid IP address for victim2!");
+	if (!p_spoofer->SetVictim1MAC(v1mac))
+		print_msg_and_abort("Invalid MAC address for victim1!");
+	if (!p_spoofer->SetVictim2MAC(v2mac))
+		print_msg_and_abort("Invalid MAC address for victim2!");
+
+	signal(SIGINT, signal_callback_handler);
+
+	p_spoofer->Start();
+
 		
-	inface = new Interface(interface_name);
-	std::cout << inface << " " << protocol << " " << time << " " << v1ip << " " << v2ip
+//	inface = new Interface(interface_name);
+	std::cout << interface_name << " " << protocol << " " << time << " " << v1ip << " " << v2ip
 			<< " " << v1mac  << " " << v2mac  << " " << std::endl;
+	delete p_spoofer;
 	return 0;
 }
 

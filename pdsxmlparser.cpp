@@ -2,10 +2,8 @@
  * pdsxmlparser.cpp
  *
  *  Created on: Feb 21, 2017
- *      Author: jose
+ *      Author: Jan Profant
  */
-
-#define DEBUG
 
 #include <iostream>
 #include <sstream>

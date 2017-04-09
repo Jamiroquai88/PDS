@@ -2,10 +2,8 @@
  * Interface.cpp
  *
  *  Created on: Feb 18, 2017
- *      Author: jose
+ *      Author: Jan Profant
  */
-
-#define DEBUG
 
 #include "interface.h"
 #include "errormsg.h"

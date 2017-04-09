@@ -32,11 +32,11 @@ class Interface {
 		Interface(std::string name);
 		virtual ~Interface();
 
-		void *Sniff(void);
-		void *Generate(void);
 		void Free();
 
+		void *Sniff(void);
 		static void *Sniff_helper(void *context) 							{ return ((Interface *)context)->Sniff(); }
+		void *Generate(void);
 		static void *Generate_helper(void *context) 						{ return ((Interface *)context)->Generate(); }
 
 		/**
