@@ -26,6 +26,7 @@ void PDSXMLParser::DumpScan(const Interface *inface, const std::string filename)
 	xmlDocPtr doc = NULL;       /* document pointer */
 	xmlNodePtr root_node = NULL, node = NULL;/* node pointers */
 	char mac[20];
+	const unsigned char *p_mac;
 	char ipv4[16];
 
 #ifdef DEBUG
@@ -37,14 +38,17 @@ void PDSXMLParser::DumpScan(const Interface *inface, const std::string filename)
 	xmlDocSetRootElement(doc, root_node);
 	for (auto &i : inface->m_hosts) {
 		node = xmlNewChild(root_node, NULL, BAD_CAST "host", NULL);
+		p_mac = i->GetMAC();
 		sprintf(mac, "%02x:%02x:%02x:%02x:%02x:%02x",
-				i->m_mac[0], i->m_mac[1], i->m_mac[2],
-				i->m_mac[3], i->m_mac[4], i->m_mac[5]);
+				p_mac[0], p_mac[1], p_mac[2],
+				p_mac[3], p_mac[4], p_mac[5]);
 		xmlNewProp(node, BAD_CAST "mac", BAD_CAST mac);
-		sprintf(ipv4, "%u.%u.%u.%u",
-				i->m_ipv4[0], i->m_ipv4[1],
-				i->m_ipv4[2], i->m_ipv4[3]);
-		xmlNewChild(node, NULL, BAD_CAST "ipv4", BAD_CAST ipv4);
+		for (auto &x : i->GetIPv4()) {
+			sprintf(ipv4, "%u.%u.%u.%u",
+					x[0], x[1],
+					x[2], x[3]);
+			xmlNewChild(node, NULL, BAD_CAST "ipv4", BAD_CAST ipv4);
+		}
 	}
 	xmlSaveFormatFileEnc(filename.c_str(), doc, "UTF-8", 1);
 	xmlFreeDoc(doc);

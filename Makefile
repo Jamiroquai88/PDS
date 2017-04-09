@@ -13,7 +13,7 @@ pds-scanner: pds-scanner.o errormsg.o interface.o pdsxmlparser.o arpheader.o hos
 pds-chooser: pds-chooser.o errormsg.o pdsxmlparser.o
 	$(CP) $(CPFLAGS) $^ -o $@ $(LIBXMLFLAGS) $(LIBXMLLIB)  -lm
 	
-pds-spoof: pds-spoof.o errormsg.o pdsxmlparser.o
+pds-spoof: pds-spoof.o errormsg.o pdsxmlparser.o interface.o host.o
 	$(CP) $(CPFLAGS) $^ -o $@ $(LIBXMLFLAGS) $(LIBXMLLIB)  -lm
 
 %.o:%.cpp

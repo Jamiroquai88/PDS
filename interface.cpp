@@ -5,11 +5,13 @@
  *      Author: jose
  */
 
-//#define DEBUG
+#define DEBUG
 
 #include "interface.h"
 #include "errormsg.h"
+#include "host.h"
 #include "arpheader.h"
+
 #include <libxml/encoding.h>
 
 /**
@@ -40,9 +42,8 @@ Interface::Interface(std::string name) : m_sockfd(0), m_index(0) {
 				std::cout << "Interface name: " << m_name << std::endl;
 
 				sa_in = (struct sockaddr_in *) ifa->ifa_addr;
-				memcpy(m_ip, inet_ntoa(sa_in->sin_addr), 16);
-				std::cout << "Interface IP: " << m_ip << std::endl;
-
+				memcpy(m_ipv4, inet_ntoa(sa_in->sin_addr), 16);
+				std::cout << "Interface IP: " << m_ipv4 << std::endl;
 				if (ioctl(m_sockfd, SIOCGIFHWADDR, &ifr) < 0) {
 					freeifaddrs(ifa);
 					print_msg_and_abort("ioctl SIOCGIFHWADDR failed");
@@ -95,15 +96,18 @@ void *Interface::Sniff() {
 #endif
  		exists = false;
 		for (auto &i : m_hosts) {
-			for (auto &ipv4 : i->m_ipv4) {
-				if (Interface::CompareUSChar(ipv4, arp_rply->sip, 4) == 0 && Interface::CompareUSChar(i->m_mac, arp_rply->smac, 6) == 0) {
-					exists = true;
-					break;
+			if (Host::CompareUSChar(i->GetMAC(), arp_rply->smac, 6) == 0) {
+				exists = true;
+				if (!i->ExistsIPv4(arp_rply->sip)) {
+					i->AddIPv4(arp_rply->sip);
 				}
 			}
 		}
-		if (!exists)
-			m_hosts.push_back(new Host(arp_rply->sip, arp_rply->smac));
+		if (!exists) {
+			Host *p_host = new Host(arp_rply->smac);
+			m_hosts.push_back(p_host);
+			p_host->AddIPv4(arp_rply->sip);
+		}
 	}
 	close(m_sockfd);
 	exit(0);
@@ -136,7 +140,7 @@ void *Interface::Generate() {
 	arp_header->hrd_add_len = ETH_ALEN;                     // 6 for eth-mac addr
 	arp_header->proto_add_len = 4;                          //4 for IPv4 addr
 	arp_header->op = htons(0x0001);				//0x0001 for ARP Request
-	inet_pton(AF_INET, m_ip, arp_header->sip);
+	inet_pton(AF_INET, m_ipv4, arp_header->sip);
 	memcpy(arp_header->smac, m_mac, 6);
 	memcpy(arp_header->dmac,dmac,ETH_ALEN);			//Set destination mac in arp-header
 	bzero(arp_header->pad,18);				//Zero fill the packet until 64 bytes reached
@@ -149,7 +153,7 @@ void *Interface::Generate() {
 	tnet = (char *) malloc ((sizeof(char)) * 16);
 	toip = (char *) malloc ((sizeof(char)) * 16);
 
-	sprintf(tnet, "%s", m_ip);
+	sprintf(tnet, "%s", m_ipv4);
 	a = strtok (tnet, "."); /* 1st ip octect */
 	b = strtok (NULL, "."); /* 2nd ip octect */
 	c = strtok (NULL, "."); /* 3rd ip octect */
@@ -170,30 +174,8 @@ void *Interface::Generate() {
 	return 0;
 }
 
-int Interface::CompareUSChar(unsigned char * a, unsigned char * b, unsigned int size)
-{
-	unsigned int i;
-
-#ifdef DEBUG
-	if (size == 4) {
-		printf("Interface::CompareUSChar IPa: %u.%u.%u.%u\n", a[0], a[1], a[2], a[3]);
-		printf("Interface::CompareUSChar IPb: %u.%u.%u.%u\n", b[0], b[1], b[2], b[3]);
-	}
-	if (size == 6) {
-		printf("Interface::CompareUSChar MACa: %02x:%02x:%02x:%02x:%02x:%02x\n", a[0], a[1], a[2], a[3], a[4], a[5]);
-		printf("Interface::CompareUSChar MACb: %02x:%02x:%02x:%02x:%02x:%02x\n", a[0], a[1], a[2], a[3], a[4], a[5]);
-	}
-#endif
-
-	for (i = 0; i < size; i++)
-    		if (a[i] != b[i])
-		return 1;
-	return 0;
-}
-
 void Interface::Free() {
 	for (auto &i : m_hosts) {
-		delete i;
+		i->Free();
 	}
-
 }

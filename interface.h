@@ -39,15 +39,14 @@ class Interface {
 		static void *Sniff_helper(void *context) 							{ return ((Interface *)context)->Sniff(); }
 		static void *Generate_helper(void *context) 						{ return ((Interface *)context)->Generate(); }
 
-		static int CompareUSChar(unsigned char * a, unsigned char * b, unsigned int size);
 		/**
 		 * Class members.
 		 */
 		int m_sockfd;
 		int m_index;
 		std::string m_name;
-		char m_ip[16];
 		unsigned char m_mac[6];
+		char m_ipv4[16];
 
 		std::vector<Host*> m_hosts;
 };

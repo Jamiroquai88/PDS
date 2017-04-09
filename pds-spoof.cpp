@@ -5,14 +5,13 @@
  *      Author: Jan Profant
  */
 
-#include <arpa/inet.h>
 #include <getopt.h>
 #include <cstring>
 #include <iostream>
-#include <sstream>
 #include <string>
 
-#include "pdsxmlparser.h"
+#include "errormsg.h"
+#include "interface.h"
 
 /**
  * Global variable for memory cleaning.
@@ -33,7 +32,8 @@ static struct option long_options[] = {
  */
 int main(int argc, char * argv[] ) {
 	int c;
-	std::string interface_name(""), protocol(""), time(""), v1ip(""), v1mac(""), v2ip(""), v2mac("");
+	std::string interface_name(""), protocol(""), v1ip(""), v1mac(""), v2ip(""), v2mac("");
+	int time = 0;
 	while (1) {
 		int option_index = 0;
 		c = getopt_long (argc, argv, "i:t:p:", long_options, &option_index);
@@ -44,7 +44,7 @@ int main(int argc, char * argv[] ) {
 				interface_name = optarg;
 				break;
 			case 't':
-				time = optarg;
+				time = atoi(optarg);
 				break;
 			case 'p':
 				protocol = optarg;
@@ -63,10 +63,9 @@ int main(int argc, char * argv[] ) {
 				break;
 		}
 	}
-	int t = SSTR(time);
 //	if (inet_pton(AF_INET, v1ip, ))
 		
-	if (interface_name.length() == 0 || protocol.length() == 0 || t <= 0) {
+	if (interface_name.length() == 0 || protocol.length() == 0 || time <= 0) {
 		print_help_scanner();
 		print_msg_and_abort("Invalid parameters!");
 	}
