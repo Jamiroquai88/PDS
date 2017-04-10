@@ -24,7 +24,9 @@ Spoofer *p_spoofer = NULL;
  */
 void signal_callback_handler(int signum)
 {
+	p_spoofer->Free();
 	delete p_spoofer;
+	exit(0);
 }
 
 /**
@@ -70,6 +72,10 @@ int main(int argc, char * argv[] ) {
 		print_msg_and_abort("Invalid parameters!");
 	}
 
+	if (getuid() && geteuid())
+		print_msg_and_abort("You must be root to run this.");
+
+
 	p_spoofer = new Spoofer();
 	p_spoofer->SetInterface(interface_name);
 	p_spoofer->SetInterval(time);
@@ -85,13 +91,16 @@ int main(int argc, char * argv[] ) {
 
 	signal(SIGINT, signal_callback_handler);
 
-	p_spoofer->Start();
+	if (!p_spoofer->Start())
+		print_msg_and_abort("Can not open socket!");
+
+//	p_spoofer->Free();
 
 		
 //	inface = new Interface(interface_name);
-	std::cout << interface_name << " " << protocol << " " << time << " " << v1ip << " " << v2ip
-			<< " " << v1mac  << " " << v2mac  << " " << std::endl;
-	delete p_spoofer;
+//	std::cout << interface_name << " " << protocol << " " << time << " " << v1ip << " " << v2ip
+//			<< " " << v1mac  << " " << v2mac  << " " << std::endl;
+//	delete p_spoofer;
 	return 0;
 }
 

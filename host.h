@@ -14,18 +14,29 @@
 class Host {
 	public:
 		Host(unsigned char *mac);
+		Host();
 		virtual ~Host();
 
-		const unsigned char* 				GetMAC() const			{ return m_mac;  }
-		const std::vector<unsigned char *>  GetIPv4() const			{ return m_ipv4; }
+		const unsigned char* 				GetMAC() const			{ return m_mac;  		}
+		const std::vector<unsigned char *>  GetIPv4() const			{ return m_ipv4; 		}
 		void AddIPv4(const unsigned char *ip);
 		void AddIPv6(const unsigned int *ip);
+		void SetMAC(unsigned char *mac);
+		unsigned char* GetIPv4(unsigned int i) const				{ return m_ipv4[i]; 	}
+		unsigned int* GetIPv6(unsigned int i) const					{ return m_ipv6[i];		}
 		bool ExistsIPv4(const unsigned char *ip);
 		bool ExistsIPv6(const unsigned int *ip);
 		void Free();
 
-		static int CompareUSChar(const unsigned char * a, const unsigned char * b, unsigned int size);
-		static int CompareUSInt(const unsigned int * a, const unsigned int * b, unsigned int size);
+		static int CompareUSChar(const unsigned char* a, const unsigned char* b, unsigned int size);
+		static int CompareUSInt(const unsigned int* a, const unsigned int* b, unsigned int size);
+		static void String2MAC(const char* src, unsigned char* dst);
+		static void String2IPv4(const char* src, unsigned char* dst);
+		static int IsValidIP(std::string ip);
+		static bool IsValidMAC(std::string mac);
+
+		enum ip_address_type { IPv4, IPv6, INVALID };
+
 	private:
 		std::vector<unsigned char *> m_ipv4;
 		std::vector<unsigned int *> m_ipv6;

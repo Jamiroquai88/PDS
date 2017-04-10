@@ -11,7 +11,7 @@ all: pds-scanner pds-chooser pds-spoof
 debug: CPFLAGS += -DDEBUG -g
 debug: pds-scanner pds-chooser pds-spoof
 
-pds-scanner: pds-scanner.o errormsg.o interface.o pdsxmlparser.o arpheader.o host.o
+pds-scanner: pds-scanner.o errormsg.o interface.o pdsxmlparser.o protheader.o host.o
 	$(CP) $(CPFLAGS) $^ -o $@ $(LIBXMLFLAGS) $(LIBXMLLIB)  -lm
 
 pds-chooser: pds-chooser.o errormsg.o pdsxmlparser.o

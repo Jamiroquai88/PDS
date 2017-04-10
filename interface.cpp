@@ -8,9 +8,8 @@
 #include "interface.h"
 #include "errormsg.h"
 #include "host.h"
-#include "arpheader.h"
-
 #include <libxml/encoding.h>
+#include "protheader.h"
 
 /**
  * Class constructor. Iterates through interfaces by name.

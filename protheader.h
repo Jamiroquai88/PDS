@@ -5,13 +5,13 @@
  *      Author: jose
  */
 
-#ifndef ARPHEADER_H_
-#define ARPHEADER_H_
+#ifndef PROTHEADER_H_
+#define PROTHEADER_H_
 
 #define ETH_ALEN	6		//Octets in one ethernet address
 
 /**
- * @brief Struct responsible for constructing ARP header.
+ * @brief Structure responsible for constructing ARP header.
  * Based on: http://divingintolinux.sanupdas.com/?p=239
  */
 struct arp_header {
@@ -27,4 +27,13 @@ struct arp_header {
 	char 			pad[18];			//Padding, ARP-Requests are quite small (<64)
 };
 
-#endif /* ARPHEADER_H_ */
+/**
+ * @brief Structure for ethernet header.
+ */
+struct eth_header {
+	unsigned char 		dmac[ETH_ALEN];
+	unsigned char		smac[ETH_ALEN];
+	unsigned short int	ethType;
+};
+
+#endif /* PROTHEADER_H_ */
