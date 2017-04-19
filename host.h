@@ -32,6 +32,7 @@ class Host {
 		static int CompareUSInt(const unsigned int* a, const unsigned int* b, unsigned int size);
 		static void String2MAC(const char* src, unsigned char* dst);
 		static void String2IPv4(const char* src, unsigned char* dst);
+		static unsigned int String2IPv4(const char *ip);
 		static int IsValidIP(std::string ip);
 		static bool IsValidMAC(std::string mac);
 

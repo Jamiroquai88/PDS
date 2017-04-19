@@ -58,6 +58,8 @@ int main(int argc, char * argv[] ) {
 	signal(SIGINT, signal_callback_handler);
 
 	inface = new Interface(interface_name);
+	if (!inface->m_isInitialized)
+		print_msg_and_abort("Failed to find interface with given name.");
 
 	int sockfd;
 	if ((sockfd = socket(PF_PACKET, SOCK_RAW, htons(ETH_P_ALL))) < 0)

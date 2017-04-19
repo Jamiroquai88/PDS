@@ -37,7 +37,7 @@ void PDSXMLParser::DumpScan(const Interface *inface, const std::string filename)
 	for (auto &i : inface->m_hosts) {
 		node = xmlNewChild(root_node, NULL, BAD_CAST "host", NULL);
 		p_mac = i->GetMAC();
-		sprintf(mac, "%02x:%02x:%02x:%02x:%02x:%02x",
+		sprintf(mac, "%02x%02x.%02x%02x.%02x%02x",
 				p_mac[0], p_mac[1], p_mac[2],
 				p_mac[3], p_mac[4], p_mac[5]);
 		xmlNewProp(node, BAD_CAST "mac", BAD_CAST mac);
@@ -113,7 +113,7 @@ void PDSXMLParser::ChooseVictimPairs(const std::string inFile, const std::string
 
 std::string PDSXMLParser::UserInput() {
 	std::string input;
-	std::cout << "Please, give me pairs (indexes of hosts) delimited by comma and terminated with comma." << std::endl
+	std::cout << "Please, give me pairs (indexes of hosts) delimited by comma and terminated by comma." << std::endl
 			<< "Example: 0 1, 2 3," << std::endl;
 	std::getline(std::cin, input);
 	return input;

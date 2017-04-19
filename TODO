@@ -1,3 +1,5 @@
+all:
+    MAC format
 scanner:
     IPv6
     mask

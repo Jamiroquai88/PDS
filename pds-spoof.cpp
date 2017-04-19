@@ -91,16 +91,12 @@ int main(int argc, char * argv[] ) {
 
 	signal(SIGINT, signal_callback_handler);
 
-	if (!p_spoofer->Start())
-		print_msg_and_abort("Can not open socket!");
+    pthread_t pt1, pt2;
+	pthread_create(&pt1, NULL, &Spoofer::StartVictim1_helper, p_spoofer);
+	pthread_create(&pt2, NULL, &Spoofer::StartVictim2_helper, p_spoofer);
 
-//	p_spoofer->Free();
+	pthread_join(pt2, NULL);
 
-		
-//	inface = new Interface(interface_name);
-//	std::cout << interface_name << " " << protocol << " " << time << " " << v1ip << " " << v2ip
-//			<< " " << v1mac  << " " << v2mac  << " " << std::endl;
-//	delete p_spoofer;
 	return 0;
 }
 

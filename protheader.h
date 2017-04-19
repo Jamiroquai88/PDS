@@ -36,4 +36,12 @@ struct eth_header {
 	unsigned short int	ethType;
 };
 
+/**
+ * @brief Structure for whole ARP packet.
+ */
+struct arp_packet {
+	struct eth_header;
+	struct arp_header;
+};
+
 #endif /* PROTHEADER_H_ */

@@ -47,6 +47,8 @@ class Interface {
 		std::string m_name;
 		unsigned char m_mac[6];
 		char m_ipv4[16];
+		char m_mask[16];
+		bool m_isInitialized;
 
 		std::vector<Host*> m_hosts;
 };

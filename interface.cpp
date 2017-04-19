@@ -9,15 +9,19 @@
 #include "errormsg.h"
 #include "host.h"
 #include <libxml/encoding.h>
+#include <bitset>
 #include "protheader.h"
+
+#define NUM_ITERS 10
 
 /**
  * Class constructor. Iterates through interfaces by name.
  * Based on: http://divingintolinux.sanupdas.com/?p=239
  */
-Interface::Interface(std::string name) : m_sockfd(0), m_index(0) {
+Interface::Interface(std::string name) : m_sockfd(0), m_index(0), m_isInitialized(false) {
 	struct ifaddrs *ifa = NULL;
 	struct sockaddr_in *sa_in = NULL;
+	struct sockaddr_in *sa_mask = NULL;
 	struct ifreq ifr;
 
 	if ((m_sockfd = socket(AF_INET, SOCK_RAW, IPPROTO_RAW)) < 0) {
@@ -36,25 +40,35 @@ Interface::Interface(std::string name) : m_sockfd(0), m_index(0) {
 				continue;
 			if (name == ifa->ifa_name) {
 				m_name = ifa->ifa_name;
-				std::cout << "Interface name: " << m_name << std::endl;
 
 				sa_in = (struct sockaddr_in *) ifa->ifa_addr;
 				memcpy(m_ipv4, inet_ntoa(sa_in->sin_addr), 16);
-				std::cout << "Interface IP: " << m_ipv4 << std::endl;
+				sa_mask = (struct sockaddr_in *) ifa->ifa_netmask;
+				memcpy(m_mask, inet_ntoa(sa_mask->sin_addr), 16);
+
 				if (ioctl(m_sockfd, SIOCGIFHWADDR, &ifr) < 0) {
 					freeifaddrs(ifa);
 					print_msg_and_abort("ioctl SIOCGIFHWADDR failed");
 				}
 				memcpy(m_mac, ifr.ifr_hwaddr.sa_data, 6);
-				printf("Interface MAC: %02x:%02x:%02x:%02x:%02x:%02x\n", m_mac[0], m_mac[1],
-						m_mac[2], m_mac[3], m_mac[4], m_mac[5]);
 
 				if (ioctl(m_sockfd, SIOCGIFINDEX, &ifr) < 0) {
 					freeifaddrs(ifa);
 					print_msg_and_abort("ioctl SIOCGIFINDEX failed\n");
 				}
 				m_index = ifr.ifr_ifindex;
+
+#ifdef DEBUG
+				std::cout << "Interface name: " << m_name << std::endl;
+				std::cout << "Interface IP: " << m_ipv4 << std::endl;
+				std::cout << "Interface mask: " << m_mask << std::endl;
+				printf("Interface MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
+						m_mac[0], m_mac[1], m_mac[2], m_mac[3], m_mac[4], m_mac[5]);
+
 				std::cout << "Interface index: " << m_index << std::endl;
+#endif
+
+				m_isInitialized = true;
 				break;
 			}
 		}
@@ -142,32 +156,28 @@ void *Interface::Generate() {
 	memcpy(arp_header->dmac,dmac,ETH_ALEN);			//Set destination mac in arp-header
 	bzero(arp_header->pad,18);				//Zero fill the packet until 64 bytes reached
 
-	char *a, *b, *c;
-	char *tnet, *net, *toip;
-	int i;
+	unsigned int ip = Host::String2IPv4(m_ipv4);
+	unsigned int mask = Host::String2IPv4(m_mask);
 
-	net = (char *) malloc ((sizeof(char)) * 16);
-	tnet = (char *) malloc ((sizeof(char)) * 16);
-	toip = (char *) malloc ((sizeof(char)) * 16);
+	unsigned int count = (~mask) & 0x7FFFFFFF;
+	unsigned int network = ip & mask;
+	char *ip_char;
+	ip_char = (char *) malloc ((sizeof(char)) * 16);
 
-	sprintf(tnet, "%s", m_ipv4);
-	a = strtok (tnet, "."); /* 1st ip octect */
-	b = strtok (NULL, "."); /* 2nd ip octect */
-	c = strtok (NULL, "."); /* 3rd ip octect */
-
-	sprintf(net, "%s.%s.%s", a, b, c);
-
-	int n;
-	for(i = 1; i <= 255; i++) {
-		usleep(2000);
-		sprintf(toip,"%s.%i", net, i);
-		inet_pton(AF_INET, toip, arp_header->dip);
-		if((n = sendto(m_sockfd, &eth_frame, 64, 0, (struct sockaddr *) &device, sizeof(device))) <= 0)
-			print_msg_and_abort("failed to send\n");
+	for (int j = 0; j < NUM_ITERS; j++) {
+		for (int i = 1; i < count; i++) {
+			unsigned int addr = network + i;
+			unsigned int addr_swapped = ntohl(addr);
+			struct in_addr ip_addr;
+			ip_addr.s_addr = addr_swapped;
+			ip_char = inet_ntoa(ip_addr);
+			usleep(2000);
+			inet_pton(AF_INET, ip_char, arp_header->dip);
+			if(sendto(m_sockfd, &eth_frame, 64, 0, (struct sockaddr *) &device, sizeof(device)) <= 0)
+				print_msg_and_abort("failed to send\n");
+		}
 	}
-	free(net);
-	free(tnet);
-	free(toip);
+
 	return 0;
 }
 

@@ -92,7 +92,7 @@ int Host::CompareUSInt(const unsigned int* a, const unsigned int* b, unsigned in
 }
 
 void Host::String2MAC(const char* src, unsigned char* dst) {
-	sscanf(src, "%hhx:%hhx:%hhx:%hhx:%hhx:%hhx",
+	sscanf(src, "%hhx%hhx.%hhx%hhx.%hhx%hhx",
 			&dst[0], &dst[1], &dst[2], &dst[3], &dst[4], &dst[5]);
 }
 
@@ -112,28 +112,16 @@ void Host::SetMAC(unsigned char* mac) {
 bool Host::IsValidMAC(std::string mac) {
 	const char *strMac = mac.c_str();
 	int i = 0;
-	if(strlen(strMac) != 17)
+	if(strlen(strMac) != 14)
 		return false;
-	for (i=0; i < 17; ++i)
+	for (i=0; i < 14; ++i)
 	{
-		if(i==2) {
-			if(strMac[i] != ':')
+		if (i == 4) {
+			if(strMac[i] != '.')
 				return false;
 		}
-		else if(i==5) {
-			if(strMac[i] != ':')
-				return false;
-		}
-		else if(i==8) {
-			if(strMac[i] != ':')
-				return false;
-		}
-		else if(i==11) {
-			if(strMac[i] != ':')
-				return false;
-		}
-		else if(i==14) {
-			if(strMac[i] != ':')
+		else if (i == 9) {
+			if (strMac[i] != '.')
 				return false;
 		}
 		else {
@@ -156,4 +144,36 @@ int Host::IsValidIP(std::string ip) {
 	if (isv6 != -1)
 		return IPv6;
 	return INVALID;
+}
+
+unsigned int Host::String2IPv4(const char* ip) {
+	unsigned v = 0;
+	int i;
+	const char * start;
+
+	start = ip;
+	for (i = 0; i < 4; i++) {
+		char c;
+		int n = 0;
+		while (1) {
+			c = * start;
+			start++;
+			if (c >= '0' && c <= '9') {
+				n *= 10;
+				n += c - '0';
+			}
+			else if ((i < 3 && c == '.') || i == 3) {
+				break;
+			}
+			else {
+				return INVALID;
+			}
+		}
+		if (n >= 256) {
+			return INVALID;
+		}
+		v *= 256;
+		v += n;
+	}
+	return v;
 }
