@@ -33,6 +33,7 @@ class Host {
 		static void String2MAC(const char* src, unsigned char* dst);
 		static void String2IPv4(const char* src, unsigned char* dst);
 		static unsigned int String2IPv4(const char *ip);
+		static void String2IPv6(const char *src, unsigned char *dst);
 		static int IsValidIP(std::string ip);
 		static bool IsValidMAC(std::string mac);
 		static void PrintMAC(const unsigned char *mac);

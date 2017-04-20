@@ -183,6 +183,12 @@ void Host::PrintMAC(const unsigned char* mac) {
 			mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
 }
 
+void Host::String2IPv6(const char* src, unsigned char* dst) {
+	struct sockaddr_in6 sav6;
+	int isv6 = inet_pton(AF_INET6, src, &(sav6.sin6_addr));
+	memcpy(dst, &sav6.sin6_addr.__in6_u, sizeof(sav6.sin6_addr.__in6_u));
+}
+
 void Host::PrintIPv4(const unsigned char* ip) {
 	printf("IPv4: %hhu.%hhu.%hhu.%hhu\n",
 			ip[0], ip[1], ip[2], ip[3]);

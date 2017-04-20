@@ -171,7 +171,7 @@ void Spoofer::ARPInjection(int sockfd, arp_packet *h) {
 	while(1)
 	{
 		byteSent = write(sockfd, buffer, ARP_PACKET_LEN);
-		printf("\n  ARP packet write on wire, %d bytes :\n\n", ARP_PACKET_LEN);
+		std::cout << "\n  ARP packet write: " << ARP_PACKET_LEN << "  " << byteSent << "\n\n";
 		usleep(m_interval * 1000);
 	}
 	close(sockfd);
@@ -198,22 +198,5 @@ void Spoofer::FillHeaders(arp_packet *h, unsigned int index) {
 		memcpy(h->arp.dmac, mp_host1->GetMAC(), sizeof(unsigned char) * 6);
 		memcpy(h->arp.dip, mp_host1->GetIPv4(0), sizeof(unsigned char) * 4);
 	}
-//
-//#ifdef DEBUG
-//	std::cout << "ETH HEADER\nInterface ";
-//	Host::PrintMAC(h->smac);
-//	std::cout << "Destination " << index << " ";
-//	Host::PrintMAC(h->dmac);
-//	std::cout << "\n\n";
-//#endif
-//#ifdef DEBUG
-//	std::cout << "ARP HEADER:\Source ";
-//	Host::PrintMAC(h->smac);
-//	Host::PrintIPv4(h->sip);
-//	std::cout << "Destination " << index << " ";
-//	Host::PrintMAC(h->dmac);
-//	Host::PrintIPv4(h->dip);
-//	std::cout << "\n\n";
-//#endif
 }
 

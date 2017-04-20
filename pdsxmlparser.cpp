@@ -58,7 +58,7 @@ void PDSXMLParser::ChooseVictimPairs(const std::string inFile, const std::string
 	xmlNodePtr root_node = NULL, node = NULL, dnode = NULL;/* node pointers */
 	unsigned int i = 0;
 	std::vector<std::string> ipv4, ipv6;
-	xmlChar * to_free = NULL;
+	xmlChar *to_free = NULL;
 
 	if ((doc = xmlReadFile(inFile.c_str(), NULL, 0)) == NULL) {
 		print_msg_and_abort("ERROR: Can not parse input XML file!");

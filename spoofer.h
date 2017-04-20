@@ -34,15 +34,11 @@ class Spoofer {
 		static void *StartVictim2_helper(void *context)     { return ((Spoofer *)context)->StartVictim2(); }
 		void *StartVictim1(void);
 		void *StartVictim2(void);
-                void Free();
+		void Free();
 		
 		enum protocol_type { ARP, NDP };
 
-	private:
-		void FillHeaders(arp_packet *h, unsigned int index);
-		int OpenSocket();
-		void ARPInjection(int sockfd, arp_packet *h);
-
+	protected:
 		/**
 		 * Class members.
 		 */
@@ -52,9 +48,15 @@ class Spoofer {
 		unsigned int m_interval;
 		Host *mp_host1;
 		Host *mp_host2;
-        Interface *mp_interface;
+		Interface *mp_interface;
 		arp_packet m_arpPacket1;
 		arp_packet m_arpPacket2;
+
+	private:
+		void FillHeaders(arp_packet *h, unsigned int index);
+		int OpenSocket();
+		void ARPInjection(int sockfd, arp_packet *h);
+
 };
 
 #endif /* SPOOFER_H_ */
