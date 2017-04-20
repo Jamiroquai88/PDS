@@ -92,7 +92,7 @@ int Host::CompareUSInt(const unsigned int* a, const unsigned int* b, unsigned in
 }
 
 void Host::String2MAC(const char* src, unsigned char* dst) {
-	sscanf(src, "%hhx%hhx.%hhx%hhx.%hhx%hhx",
+	sscanf(src, "%02x%02x.%02x%02x.%02x%02x",
 			&dst[0], &dst[1], &dst[2], &dst[3], &dst[4], &dst[5]);
 }
 
@@ -176,4 +176,14 @@ unsigned int Host::String2IPv4(const char* ip) {
 		v += n;
 	}
 	return v;
+}
+
+void Host::PrintMAC(const unsigned char* mac) {
+	printf("MAC: %02x%02x.%02x%02x.%02x%02x\n",
+			mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
+}
+
+void Host::PrintIPv4(const unsigned char* ip) {
+	printf("IPv4: %hhu.%hhu.%hhu.%hhu\n",
+			ip[0], ip[1], ip[2], ip[3]);
 }

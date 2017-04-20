@@ -35,6 +35,8 @@ class Host {
 		static unsigned int String2IPv4(const char *ip);
 		static int IsValidIP(std::string ip);
 		static bool IsValidMAC(std::string mac);
+		static void PrintMAC(const unsigned char *mac);
+		static void PrintIPv4(const unsigned char *ip);
 
 		enum ip_address_type { IPv4, IPv6, INVALID };
 

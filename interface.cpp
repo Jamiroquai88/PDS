@@ -36,7 +36,7 @@ Interface::Interface(std::string name) : m_sockfd(0), m_index(0), m_isInitialize
 	while (ifa != NULL) {
 		if (ifa->ifa_addr->sa_family == AF_INET) {
 			strcpy(ifr.ifr_name, ifa->ifa_name);
-			if (ioctl(m_sockfd, SIOCGIFFLAGS, &ifr) && (!ifr.ifr_flags & (IFF_UP|IFF_RUNNING)))
+			if (ioctl(m_sockfd, SIOCGIFFLAGS, &ifr) && (!(ifr.ifr_flags & (IFF_UP|IFF_RUNNING))))
 				continue;
 			if (name == ifa->ifa_name) {
 				m_name = ifa->ifa_name;
@@ -156,18 +156,18 @@ void *Interface::Generate() {
 	memcpy(arp_header->dmac,dmac,ETH_ALEN);			//Set destination mac in arp-header
 	bzero(arp_header->pad,18);				//Zero fill the packet until 64 bytes reached
 
-	unsigned int ip = Host::String2IPv4(m_ipv4);
-	unsigned int mask = Host::String2IPv4(m_mask);
+	uint32_t ip = Host::String2IPv4(m_ipv4);
+	uint32_t mask = Host::String2IPv4(m_mask);
 
-	unsigned int count = (~mask) & 0x7FFFFFFF;
-	unsigned int network = ip & mask;
+	uint32_t count = (~mask) & 0x7FFFFFFF;
+	uint32_t network = ip & mask;
 	char *ip_char;
 	ip_char = (char *) malloc ((sizeof(char)) * 16);
 
 	for (int j = 0; j < NUM_ITERS; j++) {
-		for (int i = 1; i < count; i++) {
-			unsigned int addr = network + i;
-			unsigned int addr_swapped = ntohl(addr);
+		for (uint32_t i = 1; i < count; i++) {
+			uint32_t addr = network + i;
+			uint32_t addr_swapped = ntohl(addr);
 			struct in_addr ip_addr;
 			ip_addr.s_addr = addr_swapped;
 			ip_char = inet_ntoa(ip_addr);

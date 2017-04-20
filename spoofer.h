@@ -23,15 +23,15 @@ class Spoofer {
 		virtual ~Spoofer();
 
 		void SetProtocolType(std::string t);
-		void SetInterface(std::string inface);
+		bool SetInterface(std::string inface);
 		void SetInterval(unsigned int time)                 { m_interval = time; 	}
 		bool SetVictim1IP(std::string ip);
 		bool SetVictim1MAC(std::string mac);
 		bool SetVictim2IP(std::string ip);
 		bool SetVictim2MAC(std::string mac);
 
-                static void *StartVictim1_helper(void *context)     { return ((Spoofer *)context)->StartVictim1(); }
-                static void *StartVictim2_helper(void *context)     { return ((Spoofer *)context)->StartVictim2(); }
+		static void *StartVictim1_helper(void *context)     { return ((Spoofer *)context)->StartVictim1(); }
+		static void *StartVictim2_helper(void *context)     { return ((Spoofer *)context)->StartVictim2(); }
 		void *StartVictim1(void);
 		void *StartVictim2(void);
                 void Free();
@@ -39,8 +39,7 @@ class Spoofer {
 		enum protocol_type { ARP, NDP };
 
 	private:
-		void FillARPHeader(arp_header *h, unsigned int index);
-		void FillEthernetHeader(eth_header *h, unsigned int index);
+		void FillHeaders(arp_packet *h, unsigned int index);
 		int OpenSocket();
 		void ARPInjection(int sockfd, arp_packet *h);
 

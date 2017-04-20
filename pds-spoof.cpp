@@ -77,9 +77,10 @@ int main(int argc, char * argv[] ) {
 
 
 	p_spoofer = new Spoofer();
-	p_spoofer->SetInterface(interface_name);
 	p_spoofer->SetInterval(time);
 	p_spoofer->SetProtocolType(protocol);
+	if (!p_spoofer->SetInterface(interface_name))
+		print_msg_and_abort("Invalid interface name!");
 	if (!p_spoofer->SetVictim1IP(v1ip))
 		print_msg_and_abort("Invalid IP address for victim1!");
 	if (!p_spoofer->SetVictim2IP(v2ip))

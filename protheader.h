@@ -40,8 +40,8 @@ struct eth_header {
  * @brief Structure for whole ARP packet.
  */
 struct arp_packet {
-	struct eth_header;
-	struct arp_header;
+	eth_header eth;
+	arp_header arp;
 };
 
 #endif /* PROTHEADER_H_ */

