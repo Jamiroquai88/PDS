@@ -2,7 +2,7 @@
  * host.h
  *
  *  Created on: Feb 19, 2017
- *      Author: jose
+ *      Author: Jan Profant
  */
 
 #ifndef HOST_H_
@@ -11,6 +11,9 @@
 #include <string>
 #include <vector>
 
+/**
+ * @brief Handles host as independent structure.
+ */
 class Host {
 	public:
 		Host(unsigned char *mac);
@@ -40,6 +43,8 @@ class Host {
 		static void PrintIPv4(const unsigned char *ip);
 
 		enum ip_address_type { IPv4, IPv6, INVALID };
+
+		bool m_isUsed;
 
 	private:
 		std::vector<unsigned char *> m_ipv4;

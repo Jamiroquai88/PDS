@@ -2,7 +2,7 @@
  * arpheader.h
  *
  *  Created on: Feb 19, 2017
- *      Author: jose
+ *      Author: Jan Profant
  */
 
 #ifndef PROTHEADER_H_

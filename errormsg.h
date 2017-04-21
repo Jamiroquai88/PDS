@@ -1,3 +1,10 @@
+/*
+ * errormsg.cpp
+ *
+ *  Created on: Apr 9, 2017
+ *      Author: Jan Profant
+ */
+
 #ifndef ERRORMSG_H_
 #define ERRORMSG_H_
 

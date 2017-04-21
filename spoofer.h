@@ -2,7 +2,7 @@
  * spoofer.h
  *
  *  Created on: Apr 9, 2017
- *      Author: darthvader
+ *      Author: Jan Profant
  */
 
 #ifndef SPOOFER_H_
@@ -16,7 +16,9 @@
 #include "protheader.h"
 #include "interface.h"
 
-
+/**
+ * @brief Class handling spoofing operations.
+ */
 class Spoofer {
 	public:
 		Spoofer();
@@ -35,8 +37,10 @@ class Spoofer {
 		void *StartVictim1(void);
 		void *StartVictim2(void);
 		void Free();
+		void ResetARP();
 		
 		enum protocol_type { ARP, NDP };
+		bool m_isSIGINT;
 
 	protected:
 		/**

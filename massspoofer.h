@@ -13,6 +13,9 @@
 #include "protheader.h"
 #include "interface.h"
 
+/**
+ * @brief Handles mass spoofing specified in XML.
+ */
 class MassSpoofer {
 	public:
 		MassSpoofer();
@@ -24,10 +27,9 @@ class MassSpoofer {
 		void SetInterval(unsigned int time)                 { m_interval = time; 	}
 		bool SetFile(std::string f);
 		void Free();
-
-	private:
 		void Add(unsigned int index, std::string ipv4, std::string mac);
 
+	private:
 		/**
 		 * Class members.
 		 */

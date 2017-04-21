@@ -15,7 +15,7 @@
 #define NUM_ITERS 10
 
 /**
- * Class constructor. Iterates through interfaces by name.
+ * @brief Class constructor. Iterates through interfaces by name.
  * Based on: http://divingintolinux.sanupdas.com/?p=239
  */
 Interface::Interface(std::string name) : m_sockfd(0), m_index(0), m_isInitialized(false) {
@@ -77,6 +77,9 @@ Interface::Interface(std::string name) : m_sockfd(0), m_index(0), m_isInitialize
 	close(m_sockfd);
 }
 
+/**
+ * @brief Class destructor.
+ */
 Interface::~Interface() {
 
 }
@@ -181,6 +184,9 @@ void *Interface::Generate() {
 	return 0;
 }
 
+/**
+ * @brief Frees class data structures.
+ */
 void Interface::Free() {
 	for (auto &i : m_hosts) {
 		i->Free();

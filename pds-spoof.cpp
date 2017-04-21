@@ -12,12 +12,12 @@
 
 #include "errormsg.h"
 #include "interface.h"
-#include "spoofer.h"
+#include "massspoofer.h"
 
 /**
  * Global variable for memory cleaning.
  */
-Spoofer *p_spoofer = NULL;
+MassSpoofer *p_spoofer = NULL;
 
 /*
  * @brief Function to handle CTRL+C for exiting.
@@ -76,27 +76,16 @@ int main(int argc, char * argv[] ) {
 		print_msg_and_abort("You must be root to run this.");
 
 
-	p_spoofer = new Spoofer();
+	p_spoofer = new MassSpoofer();
 	p_spoofer->SetInterval(time);
 	p_spoofer->SetProtocolType(protocol);
-	if (!p_spoofer->SetInterface(interface_name))
-		print_msg_and_abort("Invalid interface name!");
-	if (!p_spoofer->SetVictim1IP(v1ip))
-		print_msg_and_abort("Invalid IP address for victim1!");
-	if (!p_spoofer->SetVictim2IP(v2ip))
-		print_msg_and_abort("Invalid IP address for victim2!");
-	if (!p_spoofer->SetVictim1MAC(v1mac))
-		print_msg_and_abort("Invalid MAC address for victim1!");
-	if (!p_spoofer->SetVictim2MAC(v2mac))
-		print_msg_and_abort("Invalid MAC address for victim2!");
+	p_spoofer->SetInterface(interface_name);
+	p_spoofer->Add(1, v1ip, v1mac);
+	p_spoofer->Add(1, v2ip, v2mac);
 
 	signal(SIGINT, signal_callback_handler);
 
-    pthread_t pt1, pt2;
-	pthread_create(&pt1, NULL, &Spoofer::StartVictim1_helper, p_spoofer);
-	pthread_create(&pt2, NULL, &Spoofer::StartVictim2_helper, p_spoofer);
-
-	pthread_join(pt2, NULL);
+	p_spoofer->Start();
 
 	return 0;
 }

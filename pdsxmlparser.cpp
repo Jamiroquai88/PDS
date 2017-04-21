@@ -14,12 +14,21 @@
 #include "pdsxmlparser.h"
 #include "errormsg.h"
 
+/**
+ * @brief Class constructor.
+ */
 PDSXMLParser::PDSXMLParser() {
 }
 
+/**
+ * @brief Class destructor.
+ */
 PDSXMLParser::~PDSXMLParser() {
 }
 
+/**
+ * @brief Dumps result of scan to XML file.
+ */
 void PDSXMLParser::DumpScan(const Interface *inface, const std::string filename) {
 	xmlDocPtr doc = NULL;       /* document pointer */
 	xmlNodePtr root_node = NULL, node = NULL;/* node pointers */
@@ -53,6 +62,9 @@ void PDSXMLParser::DumpScan(const Interface *inface, const std::string filename)
 	xmlCleanupParser();
 }
 
+/**
+ * @brief Chooses pairs of victims and dump them.
+ */
 void PDSXMLParser::ChooseVictimPairs(const std::string inFile, const std::string outFile) {
 	xmlDocPtr doc = NULL;       /* document pointer */
 	xmlNodePtr root_node = NULL, node = NULL, dnode = NULL;/* node pointers */
@@ -111,6 +123,9 @@ void PDSXMLParser::ChooseVictimPairs(const std::string inFile, const std::string
 	xmlCleanupParser();
 }
 
+/**
+ * @brief Requests user input.
+ */
 std::string PDSXMLParser::UserInput() {
 	std::string input;
 	std::cout << "Please, give me pairs (indexes of hosts) delimited by comma and terminated by comma." << std::endl
@@ -119,6 +134,9 @@ std::string PDSXMLParser::UserInput() {
 	return input;
 }
 
+/**
+ * @brief Validates user input.
+ */
 bool PDSXMLParser::ValidateInput(std::string input, int maxIndex, std::vector<unsigned int> &out) {
 	size_t pos = input.find(",");
 	if (pos == std::string::npos)
@@ -150,6 +168,9 @@ bool PDSXMLParser::ValidateInput(std::string input, int maxIndex, std::vector<un
 	return true;
 }
 
+/**
+ * @brief Adds group attributes to XML.
+ */
 void PDSXMLParser::GroupPairs(xmlNodePtr rootNode, std::vector<unsigned int> pairs) {
 	xmlNodePtr node;
 	unsigned int i = 0;

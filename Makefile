@@ -17,7 +17,7 @@ pds-scanner: pds-scanner.o errormsg.o interface.o pdsxmlparser.o protheader.o ho
 pds-chooser: pds-chooser.o errormsg.o pdsxmlparser.o
 	$(CP) $(CPFLAGS) $^ -o $@ $(LIBXMLFLAGS) $(LIBXMLLIB)  -lm
 	
-pds-spoof: pds-spoof.o errormsg.o pdsxmlparser.o interface.o host.o spoofer.o
+pds-spoof: pds-spoof.o massspoofer.o errormsg.o pdsxmlparser.o interface.o host.o spoofer.o
 	$(CP) $(CPFLAGS) $^ -o $@ $(LIBXMLFLAGS) $(LIBXMLLIB)  -lm
 
 pds-massspoof: pds-massspoof.o massspoofer.o errormsg.o spoofer.o host.o interface.o

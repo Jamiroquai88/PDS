@@ -2,7 +2,7 @@
  * Interface.h
  *
  *  Created on: Feb 18, 2017
- *      Author: jose
+ *      Author: Jan Profant
  */
 
 #ifndef INTERFACE_H_

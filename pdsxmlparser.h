@@ -2,7 +2,7 @@
  * pdsxmlparser.h
  *
  *  Created on: Feb 21, 2017
- *      Author: jose
+ *      Author: Jan Profant
  */
 
 #ifndef PDSXMLPARSER_H_
@@ -16,6 +16,9 @@
 
 #include "interface.h"
 
+/**
+ * @brief Handles XML parsing of input/output files.
+ */
 class PDSXMLParser {
 	public:
 		PDSXMLParser();

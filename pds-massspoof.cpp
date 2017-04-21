@@ -64,6 +64,8 @@ int main(int argc, char * argv[] ) {
 	if (getuid() && geteuid())
 		print_msg_and_abort("You must be root to run this.");
 
+	signal(SIGINT, signal_callback_handler);
+
 	p_spoofer = new MassSpoofer();
 	p_spoofer->SetInterval(time);
 	p_spoofer->SetProtocolType(protocol);

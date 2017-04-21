@@ -12,9 +12,10 @@
 #include <stdio.h>
 #include <cstring>
 
-
-
-Host::Host(unsigned char *mac) {
+/**
+ * @brief Class constructor.
+ */
+Host::Host(unsigned char *mac) : m_isUsed(false) {
 	memcpy(m_mac, mac, sizeof(unsigned char) * 6);
 	#ifdef DEBUG
 		printf("Host constructor MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
@@ -24,24 +25,39 @@ Host::Host(unsigned char *mac) {
 	#endif
 }
 
-Host::Host() {
+/**
+ * @brief Class constructor - override.
+ */
+Host::Host() : m_isUsed(false) {
 }
 
+/**
+ * @brief Class destructor.
+ */
 Host::~Host() {
 }
 
+/**
+ * @brief Add IPv4 address as class member.
+ */
 void Host::AddIPv4(const unsigned char *ip) {
 	unsigned char *p_ip = new unsigned char[4];
 	memcpy(p_ip, ip, sizeof(unsigned char) * 4);
 	m_ipv4.push_back(p_ip);
 }
 
+/**
+ * @brief Add IPv6 address as class member.
+ */
 void Host::AddIPv6(const unsigned int *ip) {
 	unsigned int *p_ip = new unsigned int[8];
 	memcpy(p_ip, ip, sizeof(unsigned int) * 8);
 	m_ipv6.push_back(p_ip);
 }
 
+/**
+ * @brief Check if exists same IPv4.
+ */
 bool Host::ExistsIPv4(const unsigned char* ip) {
 	for (auto &x : m_ipv4) {
 		if (CompareUSChar(x, ip, 4) == 0)
@@ -50,6 +66,9 @@ bool Host::ExistsIPv4(const unsigned char* ip) {
 	return false;
 }
 
+/**
+ * @brief Check if exists same IPv6.
+ */
 bool Host::ExistsIPv6(const unsigned int* ip) {
 	for (auto &x : m_ipv6) {
 		if (CompareUSInt(x, ip, 8) == 0)
@@ -58,6 +77,9 @@ bool Host::ExistsIPv6(const unsigned int* ip) {
 	return false;
 }
 
+/**
+ * @brief Free data structures - typically at the end.
+ */
 void Host::Free() {
 	for (auto &i : m_ipv4)
 		delete[] i;
@@ -65,6 +87,9 @@ void Host::Free() {
 		delete[] i;
 }
 
+/**
+ * @brief Compare two unsigned char arrays.
+ */
 int Host::CompareUSChar(const unsigned char * a, const unsigned char * b, unsigned int size)
 {
 #ifdef DEBUG
@@ -84,6 +109,9 @@ int Host::CompareUSChar(const unsigned char * a, const unsigned char * b, unsign
 	return 0;
 }
 
+/**
+ * @brief Compare two unsigned int arrays.
+ */
 int Host::CompareUSInt(const unsigned int* a, const unsigned int* b, unsigned int size) {
 	for (unsigned int i = 0; i < size; i++)
 	    if (a[i] != b[i])
@@ -91,16 +119,25 @@ int Host::CompareUSInt(const unsigned int* a, const unsigned int* b, unsigned in
 	return 0;
 }
 
+/**
+ * @brief Convert string MAC to unsigned char array.
+ */
 void Host::String2MAC(const char* src, unsigned char* dst) {
 	sscanf(src, "%02x%02x.%02x%02x.%02x%02x",
 			&dst[0], &dst[1], &dst[2], &dst[3], &dst[4], &dst[5]);
 }
 
+/**
+ * @brief Convert string IPv4 to unsigned char array.
+ */
 void Host::String2IPv4(const char* src, unsigned char* dst) {
 	sscanf(src, "%hhu.%hhu.%hhu.%hhu",
 			&dst[0], &dst[1], &dst[2], &dst[3]);
 }
 
+/**
+ * @brief Sets MAC address of host.
+ */
 void Host::SetMAC(unsigned char* mac) {
 	memcpy(m_mac, mac, sizeof(unsigned char) * 6);
 }
@@ -134,6 +171,9 @@ bool Host::IsValidMAC(std::string mac) {
 	return true;
 }
 
+/**
+ * @brief Check if IP address is valid.
+ */
 int Host::IsValidIP(std::string ip) {
 	struct sockaddr_in sa;
 	struct sockaddr_in6 sav6;
@@ -146,6 +186,9 @@ int Host::IsValidIP(std::string ip) {
 	return INVALID;
 }
 
+/**
+ * @brief Convert string to IPv4 address as single unsigned int.
+ */
 unsigned int Host::String2IPv4(const char* ip) {
 	unsigned v = 0;
 	int i;
@@ -178,17 +221,26 @@ unsigned int Host::String2IPv4(const char* ip) {
 	return v;
 }
 
+/**
+ * @brief Prints MAC address.
+ */
 void Host::PrintMAC(const unsigned char* mac) {
 	printf("MAC: %02x%02x.%02x%02x.%02x%02x\n",
 			mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
 }
 
+/**
+ * @brief Convert string to IPv6 address.
+ */
 void Host::String2IPv6(const char* src, unsigned char* dst) {
 	struct sockaddr_in6 sav6;
-	int isv6 = inet_pton(AF_INET6, src, &(sav6.sin6_addr));
+	inet_pton(AF_INET6, src, &(sav6.sin6_addr));
 	memcpy(dst, &sav6.sin6_addr.__in6_u, sizeof(sav6.sin6_addr.__in6_u));
 }
 
+/**
+ * @brief Prints IPv4 address.
+ */
 void Host::PrintIPv4(const unsigned char* ip) {
 	printf("IPv4: %hhu.%hhu.%hhu.%hhu\n",
 			ip[0], ip[1], ip[2], ip[3]);

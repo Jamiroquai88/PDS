@@ -14,12 +14,21 @@
 #include <libxml/parser.h>
 #include <libxml/tree.h>
 
+/**
+ * @brief Class constructor.
+ */
 MassSpoofer::MassSpoofer() : m_ipType(Host::INVALID), m_interval(0) {
 }
 
+/**
+ * @brief Class destructor.
+ */
 MassSpoofer::~MassSpoofer() {
 }
 
+/**
+ * @brief Start mass spoofing.
+ */
 void MassSpoofer::Start() {
 	pthread_t *pt1, *pt2;
 	for (unsigned int i = 0; i < m_spoofTuples.size(); i++) {
@@ -33,10 +42,16 @@ void MassSpoofer::Start() {
 	pthread_join(*pt2, 0);
 }
 
+/**
+ * @brief Sets name of interface.
+ */
 void MassSpoofer::SetInterface(std::string inface) {
 	 m_interface = inface;
 }
 
+/**
+ * @brief Sets and loads input XML file.
+ */
 bool MassSpoofer::SetFile(std::string f) {
 	xmlDocPtr doc = NULL;       /* document pointer */
 	xmlNodePtr root_node = NULL, node = NULL, dnode = NULL;/* node pointers */
@@ -44,13 +59,17 @@ bool MassSpoofer::SetFile(std::string f) {
 	std::string strindex("");
 	int index = 0;
 	std::string node_content;
+	xmlChar *group_attr;
 
 	if ((doc = xmlReadFile(f.c_str(), NULL, 0)) == NULL)
 		return false;
 	root_node = xmlDocGetRootElement(doc);
 	for (node = root_node->children; node; node = node->next) {
 		if (node->type == XML_ELEMENT_NODE && strcmp((char *)node->name, "host") == 0) {
-			strindex = (const char*)xmlGetProp(node, (const xmlChar*)"group");
+			group_attr = xmlGetProp(node, (const xmlChar*)"group");
+			if (group_attr == 0)
+				continue;
+			strindex = (const char*)group_attr;
 			mac = (const char*)xmlGetProp(node, (const xmlChar*)"mac");
 			strindex = std::regex_replace(strindex, std::regex("victim-pair-"), "");
 			index = atoi(strindex.c_str());
@@ -70,16 +89,23 @@ bool MassSpoofer::SetFile(std::string f) {
 	return true;
 }
 
+/**
+ * @brief Frees class data structures.
+ */
 void MassSpoofer::Free() {
-	for (auto &i : m_threads)
+	for (auto &i : m_threads) {
 		delete i;
+	}
 	for (auto &i : m_spoofTuples) {
+		i->ResetARP();
 		i->Free();
 		delete i;
 	}
-
 }
 
+/**
+ * @brief Adds host and creates spoofing pair.
+ */
 void MassSpoofer::Add(unsigned int index, std::string ipv4, std::string mac) {
 	if (m_spoofTuples.size() < index) {
 		m_spoofTuples.push_back(new Spoofer());
