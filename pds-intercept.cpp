@@ -66,7 +66,6 @@ int main(int argc, char * argv[] ) {
 
 	pthread_t *pt1, *pt2;
 	for (auto &i : p_intercepter->GetHostsMap()) {
-		std::cout << i.first << std::endl;
 		pt1 = new pthread_t();
 		pthread_create(pt1, NULL, &Intercepter::Start_helper, p_intercepter);
 		threads.push_back(pt1);

@@ -14,6 +14,7 @@
 #include <libxml/parser.h>
 #include <libxml/tree.h>
 #include <net/ethernet.h>
+#include <iomanip>
 
 /**
  * @brief Class constructor.
@@ -101,8 +102,9 @@ void *Intercepter::Start(void) {
 	int sock_fd = OpenSocket();
 	struct sockaddr_ll sll;
 	InitSLL(&sll);
-	unsigned char *buffer = new unsigned char[ETHER_ADDR_LEN];
+	unsigned char *buffer = new unsigned char[ETH_FRAME_SIZE];
 	Host *host1 = 0, *host2 = 0;
+	int received = 0;
 	for (auto &i : m_hostsMap) {
 		if (!i.second[0]->m_isUsed) {
 			host1 = i.second[0];
@@ -120,9 +122,26 @@ void *Intercepter::Start(void) {
 	const unsigned char *src = host1->GetMAC();
 	const unsigned char *dst = host2->GetMAC();
 	while (true) {
-		if (recv(sock_fd, buffer, ETH_FRAME_SIZE, 0) < 0)
+		if ((received = recv(sock_fd, buffer, ETH_FRAME_SIZE, 0)) < 0)
 			continue;
-		if (Host::CompareUSChar(buffer + ETHER_ADDR_LEN, src, ETHER_ADDR_LEN)) {
+		if (Host::CompareUSChar(buffer + ETHER_ADDR_LEN, src, ETHER_ADDR_LEN) == 0) {
+#ifdef DEBUG
+			std::cout << "INFO: Detected source MAC address." << std::endl;
+			std::cout << "      Source: ";
+			Host::PrintMAC(src);
+			std::cout << " ";
+			Host::PrintIPv4(host1->GetIPv4(0));
+			std::cout << ", destination: ";
+			Host::PrintMAC(dst);
+			std::cout << " ";
+			Host::PrintIPv4(host2->GetIPv4(0));
+			std::cout << ", sending from: ";
+			Host::PrintMAC(mp_interface->m_mac);
+			std::cout << std::endl;
+//			for(int i = 0; i < received; i++)
+//				printf("%02x ", buffer[i]);
+			std::cout << std::endl;
+#endif
 			memcpy(buffer, dst, ETHER_ADDR_LEN);
 			memcpy(buffer + ETHER_ADDR_LEN, mp_interface->m_mac, ETHER_ADDR_LEN);
 			sendto(sock_fd, (const void *)buffer, ETH_FRAME_SIZE, 0,

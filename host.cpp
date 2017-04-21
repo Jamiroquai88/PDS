@@ -92,16 +92,16 @@ void Host::Free() {
  */
 int Host::CompareUSChar(const unsigned char * a, const unsigned char * b, unsigned int size)
 {
-#ifdef DEBUG
-	if (size == 4) {
-		printf("Interface::CompareUSChar IPa: %u.%u.%u.%u\n", a[0], a[1], a[2], a[3]);
-		printf("Interface::CompareUSChar IPb: %u.%u.%u.%u\n", b[0], b[1], b[2], b[3]);
-	}
-	if (size == 6) {
-		printf("Interface::CompareUSChar MACa: %02x:%02x:%02x:%02x:%02x:%02x\n", a[0], a[1], a[2], a[3], a[4], a[5]);
-		printf("Interface::CompareUSChar MACb: %02x:%02x:%02x:%02x:%02x:%02x\n", a[0], a[1], a[2], a[3], a[4], a[5]);
-	}
-#endif
+//#ifdef DEBUG
+//	if (size == 4) {
+//		printf("Interface::CompareUSChar IPa: %u.%u.%u.%u\n", a[0], a[1], a[2], a[3]);
+//		printf("Interface::CompareUSChar IPb: %u.%u.%u.%u\n", b[0], b[1], b[2], b[3]);
+//	}
+//	if (size == 6) {
+//		printf("Interface::CompareUSChar MACa: %02x:%02x:%02x:%02x:%02x:%02x\n", a[0], a[1], a[2], a[3], a[4], a[5]);
+//		printf("Interface::CompareUSChar MACb: %02x:%02x:%02x:%02x:%02x:%02x\n", a[0], a[1], a[2], a[3], a[4], a[5]);
+//	}
+//#endif
 
 	for (unsigned int i = 0; i < size; i++)
     		if (a[i] != b[i])
@@ -225,7 +225,7 @@ unsigned int Host::String2IPv4(const char* ip) {
  * @brief Prints MAC address.
  */
 void Host::PrintMAC(const unsigned char* mac) {
-	printf("MAC: %02x%02x.%02x%02x.%02x%02x\n",
+	printf("%02x%02x.%02x%02x.%02x%02x",
 			mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
 }
 
@@ -242,6 +242,6 @@ void Host::String2IPv6(const char* src, unsigned char* dst) {
  * @brief Prints IPv4 address.
  */
 void Host::PrintIPv4(const unsigned char* ip) {
-	printf("IPv4: %hhu.%hhu.%hhu.%hhu\n",
+	printf("%hhu.%hhu.%hhu.%hhu",
 			ip[0], ip[1], ip[2], ip[3]);
 }

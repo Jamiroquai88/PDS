@@ -196,16 +196,17 @@ int Spoofer::OpenSocket() {
  */
 void Spoofer::ARPInjection(int sockfd, arp_packet *h) {
 	unsigned char *buffer = NULL;
-	ssize_t byteSent = 0;
 
 	buffer = (unsigned char *) h;
-//		hex_dump((const unsigned char*)buffer, sizeof(struct ArpPacket));
 
 	while(1)
 	{
 		if (m_isSIGINT)
 			break;
-		byteSent = write(sockfd, buffer, ARP_PACKET_LEN);
+		write(sockfd, buffer, ARP_PACKET_LEN);
+#ifdef DEBUG
+		std::cout << "INFO: ARP spoof sent ..." << std::endl;
+#endif
 		usleep(m_interval * 1000);
 	}
 	close(sockfd);
