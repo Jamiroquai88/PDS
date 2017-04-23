@@ -57,6 +57,7 @@ bool MassSpoofer::SetFile(std::string f) {
 	xmlNodePtr root_node = NULL, node = NULL, dnode = NULL;/* node pointers */
 	std::string ipv4, mac;
 	std::string strindex("");
+	size_t delim = 0;
 	int index = 0;
 	std::string node_content;
 	xmlChar *group_attr;
@@ -71,7 +72,8 @@ bool MassSpoofer::SetFile(std::string f) {
 				continue;
 			strindex = (const char*)group_attr;
 			mac = (const char*)xmlGetProp(node, (const xmlChar*)"mac");
-			strindex = std::regex_replace(strindex, std::regex("victim-pair-"), "");
+			delim = strindex.find_last_of("-");
+			strindex = strindex.substr(delim + 1, strindex.length() - delim - 1);
 			index = atoi(strindex.c_str());
 			for (dnode = node->children; dnode; dnode = dnode->next) {
 				if (dnode->type == XML_ELEMENT_NODE) {

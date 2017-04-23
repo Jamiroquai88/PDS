@@ -47,6 +47,7 @@ void Intercepter::SetFile(std::string f) {
 	bool is_ipv4 = false;
 	std::string node_content;
 	xmlChar *group_attr;
+	size_t delim = 0;
 
 	if ((doc = xmlReadFile(f.c_str(), NULL, 0)) == NULL)
 		print_msg_and_abort("Failed to open input XML file!");
@@ -58,7 +59,8 @@ void Intercepter::SetFile(std::string f) {
 				continue;
 			strindex = (const char*)group_attr;
 			mac = (const char*)xmlGetProp(node, (const xmlChar*)"mac");
-			strindex = std::regex_replace(strindex, std::regex("victim-pair-"), "");
+			delim = strindex.find_last_of("-");
+			strindex = strindex.substr(delim + 1, strindex.length() - delim - 1);
 			index = atoi(strindex.c_str());
 			AddHost(index, mac);
 			for (dnode = node->children; dnode; dnode = dnode->next) {
@@ -138,16 +140,17 @@ void *Intercepter::Start(void) {
 			std::cout << ", sending from: ";
 			Host::PrintMAC(mp_interface->m_mac);
 			std::cout << std::endl;
-//			for(int i = 0; i < received; i++)
-//				printf("%02x ", buffer[i]);
+			for(int i = 0; i < received; i++)
+				printf("%02x ", buffer[i]);
 			std::cout << std::endl;
 #endif
 			memcpy(buffer, dst, ETHER_ADDR_LEN);
 			memcpy(buffer + ETHER_ADDR_LEN, mp_interface->m_mac, ETHER_ADDR_LEN);
-			sendto(sock_fd, (const void *)buffer, ETH_FRAME_SIZE, 0,
+			sendto(sock_fd, (const void *)buffer, received, 0,
 					(const struct sockaddr *)&sll, sizeof(struct sockaddr_ll));
 		}
 	}
+	return 0;
 }
 
 /**

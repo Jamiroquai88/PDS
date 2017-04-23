@@ -1,7 +1,7 @@
 CP=g++
 LIBXMLFLAGS=`xml2-config --cflags`
 LIBXMLLIB=`xml2-config --libs | sed -e 's@-lz@@g'`
-CPFLAGS=-std=c++11 -pthread -pedantic -Wall
+CPFLAGS=-std=c++11 -pthread -pedantic -Wall -Wformat=0 -Wno-unused-result -Wno-unused-variable
 CPP_FILES := $(wildcard *.cpp)
 OBJ_FILES := $(CPP_FILES:.cpp=.o)
 
@@ -31,3 +31,6 @@ pds-intercept: pds-intercept.o intercepter.o errormsg.o spoofer.o host.o interfa
 
 clean:
 	$(RM) pds-scanner pds-chooser pds-spoof pds-massspoof pds-intercept $(OBJ_FILES) *.h.gch
+
+zip:
+	zip xprofa00.zip *.cpp *.h Makefile xprofa00.pdf
